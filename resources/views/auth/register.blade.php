@@ -239,6 +239,13 @@ body {
         </div>
     </div>
 
+    <div class="form-check mt-4">
+        <input class="form-check-input" type="checkbox" name="consentimento_dados" value="1" id="consentimento_dados" required>
+        <label class="form-check-label small text-muted" for="consentimento_dados">
+            Confirmo que autorizo a recolha e uso dos meus dados pessoais para criacao da conta, matricula, pagamentos, comunicacoes e emissao de certificados.
+        </label>
+    </div>
+
     <!-- BOTÃO -->
     <div class="mt-4">
         <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">

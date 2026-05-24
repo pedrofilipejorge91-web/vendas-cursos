@@ -41,6 +41,7 @@ class AuthController extends Controller
             'contacto' => 'required',
 
             'escola_actual' => 'nullable|string',
+            'consentimento_dados' => 'accepted',
         ]);
 
         DB::beginTransaction();
@@ -53,6 +54,8 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'tipo' => 'estudante',
+                'termos_aceites_em' => now(),
+                'privacidade_aceite_em' => now(),
             ]);
 
             // 2. PESSOA

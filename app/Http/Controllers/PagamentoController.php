@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Models\Cupom;
 use App\Models\Matricula;
 use App\Models\Pagamento;
 use App\Models\Pedido;
+use App\Services\NotificacaoService;
+use App\Services\PagamentoGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Services\NotificacaoService;
-use App\Services\PagamentoGatewayService;
 
 class PagamentoController extends Controller
 {
@@ -26,30 +25,41 @@ class PagamentoController extends Controller
                 ->withErrors(['carrinho' => 'Adicione pelo menos um curso antes de finalizar a compra.']);
         }
 
-        $subtotal = $this->calcularTotal($carrinho);
-        $cupom = null;
-        $desconto = 0;
-        $total = $subtotal;
-
-        $metodos = $this->metodosPagamento();
+        [$subtotal, $cupom, $desconto, $total] = $this->calcularTotais($carrinho);
+        $metodos = app(PagamentoGatewayService::class)->metodosDisponiveis();
 
         return view('home.pagamento', compact('carrinho', 'subtotal', 'desconto', 'total', 'cupom', 'metodos'));
     }
 
     public function aplicarCupom(Request $request)
     {
-        // Removido: sistema de cupons desabilitado.
-        return back()->withErrors(['cupom' => 'Cupons de desconto estão desabilitados.']);
-    }
+        $request->validate([
+            'codigo' => 'required|string|max:50',
+        ]);
 
+        $cupom = Cupom::where('codigo', strtoupper(trim($request->codigo)))->first();
+
+        if (! $cupom || ! $cupom->estaDisponivel()) {
+            return back()->withErrors(['cupom' => 'Cupom invalido, expirado ou indisponivel.']);
+        }
+
+        $subtotal = $this->calcularTotal(session()->get('carrinho', []));
+
+        if ($cupom->calcularDesconto($subtotal) <= 0) {
+            return back()->withErrors(['cupom' => 'Este cupom nao gera desconto para a compra atual.']);
+        }
+
+        session(['cupom_id' => $cupom->id]);
+
+        return back()->with('success', 'Cupom aplicado com sucesso.');
+    }
 
     public function removerCupom()
     {
-        // Removido: sistema de cupons desabilitado.
         session()->forget('cupom_id');
-        return back()->with('success', 'Cupom não utilizado (cupons desabilitados).');
-    }
 
+        return back()->with('success', 'Cupom removido.');
+    }
 
     public function processar(Request $request)
     {
@@ -72,11 +82,7 @@ class PagamentoController extends Controller
             : null;
 
         $pedido = DB::transaction(function () use ($request, $carrinho, $comprovativoPath) {
-            $subtotal = $this->calcularTotal($carrinho);
-            $cupom = null;
-            $desconto = 0;
-            $total = $subtotal;
-
+            [$subtotal, $cupom, $desconto, $total] = $this->calcularTotais($carrinho);
 
             $pedido = Pedido::create([
                 'user_id' => Auth::id(),
@@ -108,7 +114,9 @@ class PagamentoController extends Controller
                 'confirmado_em' => null,
             ]);
 
-
+            if ($cupom) {
+                $cupom->increment('usos');
+            }
 
             return $pedido->load('itens', 'pagamento');
         });
@@ -118,13 +126,13 @@ class PagamentoController extends Controller
         app(NotificacaoService::class)->enviar(
             Auth::user(),
             'Pedido criado',
-            'Seu pedido '.$pedido->referencia.' foi criado e está aguardando pagamento.',
+            'Seu pedido '.$pedido->referencia.' foi criado e esta aguardando pagamento.',
             ['email', 'sms', 'whatsapp']
         );
 
         return redirect()
             ->route('pagamento.comprovante', $pedido)
-            ->with('success', 'Pedido criado com sucesso. Complete o pagamento conforme instruções.');
+            ->with('success', 'Pedido criado com sucesso. Complete o pagamento conforme instrucoes.');
     }
 
     public function comprovante(Pedido $pedido, PagamentoGatewayService $gatewayService)
@@ -171,12 +179,27 @@ class PagamentoController extends Controller
         );
     }
 
-
     private function calcularTotal(array $carrinho): float
     {
         return collect($carrinho)->sum(function ($item) {
             return ((float) $item['preco']) * ((int) ($item['quantidade'] ?? 1));
         });
+    }
+
+    private function calcularTotais(array $carrinho): array
+    {
+        $subtotal = $this->calcularTotal($carrinho);
+        $cupom = session('cupom_id') ? Cupom::find(session('cupom_id')) : null;
+        $desconto = $cupom?->calcularDesconto($subtotal) ?? 0;
+
+        if ($cupom && $desconto <= 0) {
+            session()->forget('cupom_id');
+            $cupom = null;
+        }
+
+        $total = max($subtotal - $desconto, 0);
+
+        return [$subtotal, $cupom, $desconto, $total];
     }
 
     private function gerarReferencia(string $prefixo): string
@@ -186,15 +209,5 @@ class PagamentoController extends Controller
         } while (Pedido::where('referencia', $referencia)->exists() || Pagamento::where('referencia', $referencia)->exists());
 
         return $referencia;
-    }
-
-    private function metodosPagamento(): array
-    {
-        return [
-            'multicaixa_express' => 'Multicaixa Express',
-            'transferencia_bancaria' => 'Transferencia bancaria',
-            'mbway_angola' => 'MBWay Angola',
-            'pagamento_presencial' => 'Pagamento presencial',
-        ];
     }
 }

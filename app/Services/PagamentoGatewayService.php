@@ -8,6 +8,16 @@ use Illuminate\Support\Str;
 
 class PagamentoGatewayService
 {
+    public function metodosDisponiveis(): array
+    {
+        return [
+            'multicaixa_express' => 'Multicaixa Express',
+            'transferencia_bancaria' => 'Transferencia bancaria',
+            'mbway_angola' => 'MBWay Angola',
+            'pagamento_presencial' => 'Pagamento presencial',
+        ];
+    }
+
     public function gerarUrlPagamento(Pedido $pedido, ?Pagamento $pagamento = null): ?string
     {
         $metodo = $pagamento?->metodo ?? null;

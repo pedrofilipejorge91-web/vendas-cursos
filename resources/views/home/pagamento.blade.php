@@ -84,7 +84,28 @@
 
             <hr class="my-4">
 
-
+            <div class="mb-5">
+                <h4 class="font-bold text-slate-800 mb-3">Cupom de desconto</h4>
+                @if($cupom)
+                    <div class="flex items-center justify-between gap-3 bg-green-50 border border-green-100 rounded-lg p-3 text-sm text-green-800">
+                        <span>{{ $cupom->codigo }} aplicado</span>
+                        <form action="{{ route('pagamento.cupom.remover') }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="font-bold text-green-900 underline">Remover</button>
+                        </form>
+                    </div>
+                @else
+                    <form action="{{ route('pagamento.cupom.aplicar') }}" method="POST" class="flex gap-2">
+                        @csrf
+                        <input type="text" name="codigo" value="{{ old('codigo') }}" placeholder="Codigo do cupom"
+                            class="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <button type="submit" class="px-4 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 transition">
+                            Aplicar
+                        </button>
+                    </form>
+                @endif
+            </div>
 
             <div class="space-y-2 text-sm">
                 <div class="flex justify-between">

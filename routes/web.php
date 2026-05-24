@@ -20,6 +20,7 @@ use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\CupomController;
 
 
 
@@ -56,6 +57,10 @@ Route::middleware(['auth', 'tipo:admin'])->group(function () {
 
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'admin'])->name('admin.dashboard');
     Route::get('/admin/relatorios', [RelatorioController::class, 'admin'])->name('admin.relatorios');
+    Route::get('/admin/cupons', [CupomController::class, 'index'])->name('admin.cupons.index');
+    Route::post('/admin/cupons', [CupomController::class, 'store'])->name('admin.cupons.store');
+    Route::put('/admin/cupons/{cupom}', [CupomController::class, 'update'])->name('admin.cupons.update');
+    Route::delete('/admin/cupons/{cupom}', [CupomController::class, 'destroy'])->name('admin.cupons.destroy');
     Route::get('/admin/administradores', [AdminUserController::class, 'index'])->name('admin.administradores.index');
     Route::post('/admin/administradores', [AdminUserController::class, 'store'])->name('admin.administradores.store');
     Route::put('/admin/administradores/{administrador}', [AdminUserController::class, 'update'])->name('admin.administradores.update');
@@ -158,6 +163,8 @@ Route::post('/carrinho/limpar', [CarrinhoController::class, 'clear'])->name('car
 Route::get('/pagamento', [PagamentoController::class, 'index'])
     ->name('pagamento');
 
+Route::post('/pagamento/cupom', [PagamentoController::class, 'aplicarCupom'])->name('pagamento.cupom.aplicar');
+Route::delete('/pagamento/cupom', [PagamentoController::class, 'removerCupom'])->name('pagamento.cupom.remover');
 Route::get('/pagamento/comprovante/{pedido}', [PagamentoController::class, 'comprovante'])->name('pagamento.comprovante');
 Route::post('/pagamento/{pedido}/confirmar', [PagamentoController::class, 'confirmar'])->name('pagamento.confirmar');
 
