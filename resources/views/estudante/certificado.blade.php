@@ -23,11 +23,16 @@
                     $solicitacao = \App\Models\CertificadoSolicitacao::where('matricula_id', $matricula->id)->first();
                 @endphp
 
-                @if($solicitacao && $solicitacao->status === 'aprovado')
+                @if($solicitacao && $solicitacao->status === \App\Models\CertificadoSolicitacao::STATUS_APROVADO)
                     <a href="{{ route('estudante.certificado.download', $matricula->id) }}" class="btn btn-success">
                         <i class="bi bi-download me-1"></i> Download PDF
                     </a>
                 @else
+                    @if($solicitacao && $solicitacao->status !== \App\Models\CertificadoSolicitacao::STATUS_AGUARDANDO_ADMIN)
+                        <a href="{{ route('estudante.certificados.questionario', $matricula) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil-square me-1"></i> Ver prova
+                        </a>
+                    @endif
                     <a class="btn btn-secondary disabled" href="#" aria-disabled="true" onclick="return false;">
                         <i class="bi bi-lock me-1"></i> Download disponível após aprovação do admin
                     </a>

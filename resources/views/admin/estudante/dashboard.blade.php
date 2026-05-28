@@ -7,7 +7,7 @@
 
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Gestão de Estudantes</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Gestão de Estudantes</a></li>
             <li class="breadcrumb-item active">Estudantes</li>
         </ol>
     </nav>

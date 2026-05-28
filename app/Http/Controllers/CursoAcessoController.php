@@ -187,7 +187,7 @@ class CursoAcessoController extends Controller
 
         // somente libera o PDF se o admin aprovou.
         $solicitacao = $this->obterSolicitacaoCertificado($matricula);
-        abort_unless($solicitacao && $solicitacao->status === 'aprovado', 403);
+        abort_unless($solicitacao && $solicitacao->status === CertificadoSolicitacao::STATUS_APROVADO, 403);
 
         $certificado = Certificado::firstOrCreate([
             'matricula_id' => $matricula->id,
@@ -279,7 +279,7 @@ class CursoAcessoController extends Controller
             // FK aponta para `estudantes.id`, então precisamos usar o id correto da tabela estudantes
             'estudante_id' => $matricula->user?->pessoa?->estudante?->id,
             'instrutor_id' => $formadorId,
-            'status' => 'pendente',
+            'status' => CertificadoSolicitacao::STATUS_AGUARDANDO_QUESTIONARIO,
         ]);
 
         // Notificar o instrutor do curso sobre a solicitação.

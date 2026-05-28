@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CertificadoSolicitacao;
 use App\Models\CertificadoQuestionario;
 use App\Models\CertificadoResposta;
-use App\Models\Curso;
+use App\Models\CertificadoSolicitacao;
 use App\Models\Matricula;
-use App\Models\ProgressoAula;
+use App\Models\User;
+use App\Services\NotificacaoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use App\Services\NotificacaoService;
-use Illuminate\Support\Arr;
 
 class CertificadoSolicitacaoController extends Controller
 {
@@ -24,7 +21,12 @@ class CertificadoSolicitacaoController extends Controller
         $formadorId = $user->pessoa?->formador?->id;
         abort_unless($formadorId, 403);
 
-        $solicitacoes = CertificadoSolicitacao::with(['matricula.curso', 'matricula.user', 'curso', 'instrutor', 'questionario'])
+        $solicitacoes = CertificadoSolicitacao::with([
+            'matricula.curso',
+            'matricula.user',
+            'curso',
+            'questionario.respostas.estudante.pessoa.user',
+        ])
             ->where('instrutor_id', $formadorId)
             ->orderByDesc('created_at')
             ->get();
@@ -35,38 +37,32 @@ class CertificadoSolicitacaoController extends Controller
     public function mostrarQuestionario(CertificadoSolicitacao $solicitacao)
     {
         $user = Auth::user();
-        abort_unless($user, 403);
+        abort_unless($user && $user->tipo === 'formador', 403);
 
-        // Permissões:
-        // - estudante vê apenas a própria solicitação
-        // - formador pode acessar somente solicitações do curso dele (instrutor_id)
-        if ((string) $user->tipo === 'estudante') {
-            abort_unless(
-                (int) $solicitacao->estudante_id === (int) $user->pessoa?->estudante?->id,
-                403
-            );
-        } elseif ((string) $user->tipo === 'formador') {
-            $formadorId = $user->pessoa?->formador?->id;
-            abort_unless(
-                $formadorId && (int) $solicitacao->instrutor_id === (int) $formadorId,
-                403
-            );
-        } else {
-            abort_unless(false, 403);
-        }
+        $formadorId = $user->pessoa?->formador?->id;
+        abort_unless($formadorId && (int) $solicitacao->instrutor_id === (int) $formadorId, 403);
 
-        $questionario = $solicitacao->questionario()->firstOrCreate([
-            'matricula_id' => $solicitacao->matricula_id,
-            'curso_id' => $solicitacao->curso_id,
-        ], [
-            'perguntas' => null,
-            'criado_em' => now(),
-        ]);
+        $solicitacao->load(['matricula.user', 'curso', 'questionario.respostas.estudante.pessoa.user']);
+        $questionario = $solicitacao->questionario()->first();
+        $resposta = $questionario?->respostas()->with('estudante.pessoa.user')->latest('enviado_em')->first();
 
-        return view('estudante.certificados.questionario', [
-            'solicitacao' => $solicitacao,
-            'questionario' => $questionario,
-        ]);
+        return view('formador.certificados.questionario', compact('solicitacao', 'questionario', 'resposta'));
+    }
+
+    public function mostrarQuestionarioAluno(Matricula $matricula)
+    {
+        $user = Auth::user();
+        abort_unless($user && $user->tipo === 'estudante', 403);
+        abort_unless((int) $matricula->user_id === (int) $user->id, 403);
+        abort_unless((float) $matricula->progresso >= 100, 403);
+
+        $solicitacao = $this->garantirSolicitacao($matricula);
+        $questionario = $solicitacao->questionario()->with('respostas')->first();
+        $resposta = $questionario?->respostas()
+            ->where('estudante_id', $user->pessoa?->estudante?->id)
+            ->first();
+
+        return view('estudante.certificados.questionario', compact('solicitacao', 'questionario', 'resposta'));
     }
 
     public function responderQuestionario(Request $request, CertificadoQuestionario $questionario)
@@ -77,8 +73,16 @@ class CertificadoSolicitacaoController extends Controller
         $estudanteId = $user->pessoa?->estudante?->id;
         abort_unless($estudanteId, 403);
 
+        $solicitacao = $questionario->solicitacao()->with('instrutor.pessoa.user', 'curso')->firstOrFail();
+        abort_unless((int) $solicitacao->estudante_id === (int) $estudanteId, 403);
+        abort_if($solicitacao->status === CertificadoSolicitacao::STATUS_APROVADO, 403);
+
+        $perguntas = $this->perguntas($questionario);
+        abort_unless(count($perguntas) > 0, 422, 'O formador ainda nao publicou a prova.');
+
         $request->validate([
-            'respostas' => 'required|array|max:200',
+            'respostas' => 'required|array|size:'.count($perguntas),
+            'respostas.*' => 'required|string|max:5000',
         ]);
 
         CertificadoResposta::updateOrCreate(
@@ -87,12 +91,22 @@ class CertificadoSolicitacaoController extends Controller
                 'estudante_id' => $estudanteId,
             ],
             [
-                'respostas' => json_encode($request->respostas, JSON_UNESCAPED_UNICODE),
+                'respostas' => json_encode(array_values($request->respostas), JSON_UNESCAPED_UNICODE),
                 'enviado_em' => now(),
             ]
         );
 
-        return back()->with('success', 'Respostas enviadas com sucesso.');
+        $solicitacao->update([
+            'status' => CertificadoSolicitacao::STATUS_AGUARDANDO_CORRECAO,
+        ]);
+
+        $this->notificar(
+            $solicitacao->instrutor?->pessoa?->user,
+            'Questionario respondido',
+            'O aluno respondeu a prova do curso '.$solicitacao->curso?->titulo.'. Faca a correcao e atribua uma nota.'
+        );
+
+        return back()->with('success', 'Respostas enviadas ao formador com sucesso.');
     }
 
     public function criarQuestionario(Request $request, CertificadoSolicitacao $solicitacao)
@@ -102,25 +116,41 @@ class CertificadoSolicitacaoController extends Controller
 
         $formadorId = $user->pessoa?->formador?->id;
         abort_unless($formadorId && (int) $solicitacao->instrutor_id === (int) $formadorId, 403);
+        abort_if($solicitacao->status === CertificadoSolicitacao::STATUS_APROVADO, 403);
 
         $request->validate([
-            'perguntas_texto' => 'required|string|max:5000',
+            'perguntas_texto' => 'required|string|max:10000',
         ]);
 
-        // perguntas simples como texto (separadas por linhas)
         $questionario = CertificadoQuestionario::updateOrCreate(
             [
                 'matricula_id' => $solicitacao->matricula_id,
-                'curso_id' => $solicitacao->curso_id,
-                'solicitacao_id' => $solicitacao->id,
             ],
             [
+                'curso_id' => $solicitacao->curso_id,
+                'solicitacao_id' => $solicitacao->id,
                 'perguntas' => $request->perguntas_texto,
                 'criado_em' => now(),
+                'fechado_em' => null,
             ]
         );
 
-        return back()->with('success', 'Questionário publicado para o estudante.');
+        $solicitacao->update([
+            'status' => CertificadoSolicitacao::STATUS_AGUARDANDO_RESPOSTA,
+            'nota_curso' => null,
+            'enviado_em' => null,
+            'decidido_em' => null,
+        ]);
+
+        $questionario->respostas()->delete();
+
+        $this->notificar(
+            $solicitacao->matricula?->user,
+            'Prova de certificado disponivel',
+            'O formador publicou a prova do curso '.$solicitacao->curso?->titulo.'. Responda para continuar o processo do certificado.'
+        );
+
+        return back()->with('success', 'Questionario publicado para o aluno.');
     }
 
     public function avaliadorEnviarNota(Request $request, CertificadoSolicitacao $solicitacao)
@@ -131,37 +161,34 @@ class CertificadoSolicitacaoController extends Controller
         $formadorId = $user->pessoa?->formador?->id;
         abort_unless($formadorId && (int) $solicitacao->instrutor_id === (int) $formadorId, 403);
 
+        $questionario = $solicitacao->questionario()->with('respostas')->first();
+        abort_unless($questionario && $questionario->respostas->isNotEmpty(), 422, 'O aluno ainda nao respondeu a prova.');
+
         $request->validate([
-            'nota_curso' => 'required|numeric|min:1|max:5',
+            'nota_curso' => 'required|numeric|min:0|max:20',
             'observacoes' => 'nullable|string|max:2000',
         ]);
 
         $solicitacao->update([
             'nota_curso' => $request->nota_curso,
             'observacoes_admin' => $request->observacoes,
-            'enviado_em' => $solicitacao->enviado_em ?? now(),
-            'status' => 'pendente',
+            'enviado_em' => now(),
+            'status' => CertificadoSolicitacao::STATUS_AGUARDANDO_ADMIN,
         ]);
 
-        // Notificar o ADMIN para aprovar/rejeitar
-        // (Regra: o formador notifica o admin após o aluno responder e o formador atribuir nota)
-        $admins = \App\Models\User::where('tipo', 'admin')->get();
+        $questionario->update([
+            'fechado_em' => now(),
+        ]);
 
-        foreach ($admins as $adminUser) {
-            try {
-                app(NotificacaoService::class)->enviar(
-                    $adminUser,
-                    'Nova solicitação de certificado',
-                    'O instrutor enviou a nota do curso. Verifique e aprove/rejeite a solicitação.',
-                    ['email', 'sms', 'whatsapp']
-                );
-            } catch (\Throwable $e) {
-                // Não quebrar o fluxo do formador se a notificação falhar.
-            }
-        }
+        User::where('tipo', 'admin')->each(function (User $adminUser) use ($solicitacao) {
+            $this->notificar(
+                $adminUser,
+                'Certificado aguardando aprovacao',
+                'O formador corrigiu a prova e atribuiu nota ao aluno. Aprove ou rejeite a liberacao do certificado.'
+            );
+        });
 
-
-        return back()->with('success', 'Nota enviada e solicitação encaminhada ao admin.');
+        return back()->with('success', 'Nota enviada e solicitacao encaminhada ao admin.');
     }
 
     public function listarAdmin()
@@ -169,7 +196,14 @@ class CertificadoSolicitacaoController extends Controller
         $user = Auth::user();
         abort_unless($user && $user->tipo === 'admin', 403);
 
-        $solicitacoes = CertificadoSolicitacao::with(['matricula.curso', 'matricula.user', 'instrutor'])
+        $solicitacoes = CertificadoSolicitacao::with(['matricula.curso', 'matricula.user', 'instrutor.pessoa.user'])
+            ->whereIn('status', [
+                CertificadoSolicitacao::STATUS_AGUARDANDO_ADMIN,
+                CertificadoSolicitacao::STATUS_APROVADO,
+                CertificadoSolicitacao::STATUS_REJEITADO,
+                'pendente',
+            ])
+            ->whereNotNull('nota_curso')
             ->orderByDesc('created_at')
             ->get();
 
@@ -180,13 +214,16 @@ class CertificadoSolicitacaoController extends Controller
     {
         $user = Auth::user();
         abort_unless($user && $user->tipo === 'admin', 403);
+        abort_unless($solicitacao->nota_curso !== null, 422, 'O formador ainda nao enviou a nota.');
 
         $request->validate([
             'acao' => 'required|in:aprovar,rejeitar',
             'observacoes' => 'nullable|string|max:2000',
         ]);
 
-        $status = $request->acao === 'aprovar' ? 'aprovado' : 'rejeitado';
+        $status = $request->acao === 'aprovar'
+            ? CertificadoSolicitacao::STATUS_APROVADO
+            : CertificadoSolicitacao::STATUS_REJEITADO;
 
         $solicitacao->update([
             'status' => $status,
@@ -194,8 +231,59 @@ class CertificadoSolicitacaoController extends Controller
             'observacoes_admin' => $request->observacoes,
         ]);
 
-        // se aprovado, ainda não geramos PDF automático; o download vai liberar.
-        return back()->with('success', $status === 'aprovado' ? 'Solicitação aprovada.' : 'Solicitação rejeitada.');
+        $this->notificar(
+            $solicitacao->matricula?->user,
+            $status === CertificadoSolicitacao::STATUS_APROVADO ? 'Certificado liberado' : 'Certificado rejeitado',
+            $status === CertificadoSolicitacao::STATUS_APROVADO
+                ? 'O admin aprovou o seu certificado. Ja pode baixar o PDF.'
+                : 'O admin rejeitou a liberacao do certificado. Consulte as observacoes e fale com o formador.'
+        );
+
+        return back()->with('success', $status === CertificadoSolicitacao::STATUS_APROVADO ? 'Solicitacao aprovada.' : 'Solicitacao rejeitada.');
+    }
+
+    private function garantirSolicitacao(Matricula $matricula): CertificadoSolicitacao
+    {
+        $existente = CertificadoSolicitacao::where('matricula_id', $matricula->id)->first();
+
+        if ($existente) {
+            return $existente;
+        }
+
+        $matricula->loadMissing('curso.formador.pessoa.user', 'user.pessoa.estudante');
+        $formadorId = $matricula->curso?->formador?->id;
+        $estudanteId = $matricula->user?->pessoa?->estudante?->id;
+
+        abort_unless($formadorId && $estudanteId, 404);
+
+        $solicitacao = CertificadoSolicitacao::create([
+            'matricula_id' => $matricula->id,
+            'curso_id' => $matricula->curso_id,
+            'estudante_id' => $estudanteId,
+            'instrutor_id' => $formadorId,
+            'status' => CertificadoSolicitacao::STATUS_AGUARDANDO_QUESTIONARIO,
+        ]);
+
+        $this->notificar(
+            $matricula->curso?->formador?->pessoa?->user,
+            'Aluno concluiu o curso',
+            'O aluno '.$matricula->user?->name.' concluiu o curso '.$matricula->curso?->titulo.'. Crie a prova para iniciar a liberacao do certificado.'
+        );
+
+        return $solicitacao;
+    }
+
+    private function perguntas(?CertificadoQuestionario $questionario): array
+    {
+        return array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) $questionario?->perguntas))));
+    }
+
+    private function notificar(?User $user, string $titulo, string $mensagem): void
+    {
+        try {
+            app(NotificacaoService::class)->enviar($user, $titulo, $mensagem, ['email', 'sms', 'whatsapp']);
+        } catch (\Throwable $e) {
+            // O fluxo principal nao deve falhar se a entrega externa estiver indisponivel.
+        }
     }
 }
-

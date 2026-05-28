@@ -1,0 +1,415 @@
+:root {
+  --student-blue-950: #06214a;
+  --student-blue-900: #073b73;
+  --student-blue-700: #0867ad;
+  --student-green: #12b981;
+  --student-page: #f4f8fb;
+  --student-ink: #10233f;
+  --student-muted: #64748b;
+  --student-line: #dce8f2;
+  --student-shadow: 0 18px 45px rgba(7, 34, 74, 0.1);
+  --student-radius: 8px;
+}
+
+body.student-shell {
+  background: var(--student-page);
+  color: var(--student-ink);
+  font-family: "Inter", "Nunito", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+}
+
+.student-header.header {
+  height: 72px;
+  padding: 0 24px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 12px 32px rgba(7, 34, 74, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.student-header-brand {
+  width: 280px;
+}
+
+.student-logo img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.student-logo span {
+  color: var(--student-blue-950);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.student-header .toggle-sidebar-btn {
+  width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--student-radius);
+  color: var(--student-blue-900);
+  background: #edf6fc;
+  font-size: 1.3rem;
+}
+
+.student-search {
+  min-width: min(420px, 36vw);
+  padding-left: 0;
+}
+
+.student-search .search-form {
+  width: 100%;
+  border: 1px solid var(--student-line);
+  border-radius: 999px;
+  background: #f8fbfd;
+}
+
+.student-search input {
+  height: 42px;
+  color: var(--student-ink);
+  border: 0 !important;
+  background: transparent;
+  font-size: 0.9rem;
+}
+
+.student-search button {
+  color: var(--student-blue-900);
+  border: 0;
+  background: transparent;
+}
+
+.student-icon-btn {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--student-blue-900);
+  background: #f0f7fc;
+}
+
+.header-nav .badge-number {
+  top: 5px;
+  right: 4px;
+  min-width: 18px;
+  min-height: 18px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 2px solid #fff;
+  font-size: 0.65rem;
+}
+
+.student-avatar {
+  width: 38px;
+  height: 38px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--student-blue-900), var(--student-green));
+  font-weight: 800;
+}
+
+.student-avatar.large {
+  width: 46px;
+  height: 46px;
+}
+
+.student-sidebar.sidebar {
+  top: 72px;
+  width: 280px;
+  padding: 18px 16px 24px;
+  border-right: 1px solid var(--student-line);
+  background: #fff;
+  box-shadow: 12px 0 30px rgba(7, 34, 74, 0.05);
+}
+
+.student-sidebar-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+  border: 1px solid var(--student-line);
+  border-radius: var(--student-radius);
+  background: linear-gradient(135deg, #f8fbff, #eef8f4);
+}
+
+.student-sidebar-card strong,
+.student-sidebar-card small {
+  display: block;
+}
+
+.student-sidebar-card strong {
+  color: var(--student-blue-950);
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.student-sidebar-card small {
+  color: var(--student-muted);
+  margin-top: 2px;
+}
+
+.student-sidebar .sidebar-nav {
+  padding: 0;
+}
+
+.student-sidebar .nav-heading {
+  margin: 14px 0 8px;
+  padding: 0 12px;
+  color: #8a9bb0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.student-sidebar .nav-link {
+  min-height: 44px;
+  margin-bottom: 5px;
+  padding: 10px 12px;
+  border-radius: var(--student-radius);
+  color: var(--student-blue-950);
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.student-sidebar .nav-link i {
+  width: 22px;
+  color: var(--student-blue-700);
+  font-size: 1.05rem;
+}
+
+.student-sidebar .nav-link.collapsed {
+  color: #52667c;
+  background: transparent;
+}
+
+.student-sidebar .nav-link:not(.collapsed),
+.student-sidebar .nav-link:hover {
+  color: var(--student-blue-950);
+  background: #eaf5fc;
+}
+
+.student-sidebar .nav-link:not(.collapsed) i,
+.student-sidebar .nav-link:hover i {
+  color: var(--student-green);
+}
+
+.student-main.main {
+  margin-top: 72px;
+  padding: 28px;
+}
+
+.pagetitle {
+  margin-bottom: 22px;
+}
+
+.pagetitle h1 {
+  color: var(--student-blue-950);
+  font-size: 1.5rem;
+  font-weight: 850;
+}
+
+.breadcrumb {
+  color: var(--student-muted);
+  font-size: 0.82rem;
+}
+
+.student-shell .card {
+  border: 1px solid rgba(220, 232, 242, 0.9) !important;
+  border-radius: var(--student-radius);
+  box-shadow: var(--student-shadow) !important;
+}
+
+.student-shell .card-body {
+  padding: 22px;
+}
+
+.student-shell .card-title {
+  color: var(--student-blue-950);
+  font-size: 1rem;
+  font-weight: 850;
+}
+
+.student-hero .card-body {
+  background:
+    radial-gradient(circle at 82% 18%, rgba(18, 185, 129, 0.24), transparent 32%),
+    linear-gradient(135deg, var(--student-blue-950), var(--student-blue-700));
+}
+
+.student-hero h2 {
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+  letter-spacing: 0;
+}
+
+.student-current-course {
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+}
+
+.student-shell .btn {
+  border-radius: var(--student-radius);
+  font-weight: 800;
+}
+
+.student-shell .btn-primary {
+  border-color: var(--student-blue-700);
+  background: linear-gradient(135deg, var(--student-blue-900), var(--student-blue-700));
+}
+
+.student-shell .btn-success {
+  border-color: #0ba56e;
+  background: var(--student-green);
+}
+
+.student-shell .btn-outline-primary {
+  color: var(--student-blue-900);
+  border-color: #b7d8ef;
+}
+
+.student-shell .progress {
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e6eef6;
+}
+
+.student-shell .progress-bar {
+  background: linear-gradient(90deg, var(--student-blue-700), var(--student-green));
+}
+
+.info-card .card-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--student-blue-900);
+  background: #eaf5fc;
+}
+
+.info-card h6 {
+  color: var(--student-blue-950);
+  font-size: 1.45rem;
+  font-weight: 850;
+}
+
+.student-course-card {
+  overflow: hidden;
+}
+
+.student-course-card .card-img-top {
+  height: 178px;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.student-course-card .badge {
+  color: var(--student-blue-900);
+  background: #eaf5fc !important;
+}
+
+.student-list-item {
+  border-color: var(--student-line) !important;
+  border-radius: var(--student-radius);
+}
+
+.student-list-item + .student-list-item {
+  margin-top: 8px;
+}
+
+.lesson-shell .ratio {
+  border: 1px solid var(--student-line);
+  background: #eef4f9 !important;
+}
+
+.lesson-shell .list-group-item {
+  margin-bottom: 8px;
+  border: 1px solid var(--student-line);
+  border-radius: var(--student-radius) !important;
+  color: var(--student-ink);
+  font-size: 0.88rem;
+}
+
+.lesson-shell .list-group-item.active {
+  border-color: var(--student-blue-700);
+  background: var(--student-blue-900);
+}
+
+.student-shell .form-label {
+  color: var(--student-blue-950);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.student-shell .form-control {
+  min-height: 44px;
+  border-color: var(--student-line);
+  border-radius: var(--student-radius);
+  color: var(--student-ink);
+}
+
+.student-shell .form-control:focus {
+  border-color: #9ccdeb;
+  box-shadow: 0 0 0 0.2rem rgba(8, 103, 173, 0.12);
+}
+
+.footer {
+  border-top: 1px solid var(--student-line);
+  color: var(--student-muted);
+  background: transparent;
+  font-size: 0.82rem;
+}
+
+.back-to-top {
+  background: var(--student-blue-900);
+}
+
+@media (min-width: 1200px) {
+  .student-main.main,
+  .footer {
+    margin-left: 280px;
+  }
+}
+
+@media (max-width: 1199px) {
+  .student-sidebar.sidebar {
+    left: -280px;
+  }
+
+  .toggle-sidebar .student-sidebar.sidebar {
+    left: 0;
+  }
+
+  .student-main.main,
+  .footer {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .student-header.header {
+    padding: 0 14px;
+  }
+
+  .student-header-brand {
+    width: auto;
+    gap: 10px;
+  }
+
+  .student-search {
+    display: none;
+  }
+
+  .student-main.main {
+    padding: 18px 14px;
+  }
+
+  .pagetitle h1 {
+    font-size: 1.25rem;
+  }
+}

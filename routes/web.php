@@ -134,7 +134,7 @@ Route::middleware(['auth', 'tipo:estudante'])->group(function () {
 Route::get('/estudante/dashboard', [CursoAcessoController::class, 'dashboard'])->name('dashboard');
 
     // Certificados / questionário
-    Route::get('/meus-cursos/{matricula}/certificado/questionario', [\App\Http\Controllers\CertificadoSolicitacaoController::class, 'mostrarQuestionario'])->name('estudante.certificados.questionario');
+    Route::get('/meus-cursos/{matricula}/certificado/questionario', [\App\Http\Controllers\CertificadoSolicitacaoController::class, 'mostrarQuestionarioAluno'])->name('estudante.certificados.questionario');
     Route::post('/certificados/questionarios/{questionario}/responder', [\App\Http\Controllers\CertificadoSolicitacaoController::class, 'responderQuestionario'])->name('estudante.certificados.responder_questionario');
     Route::get('/estudante/perfil', [CursoAcessoController::class, 'perfil'])->name('estudante.perfil');
     Route::put('/estudante/perfil', [CursoAcessoController::class, 'actualizarPerfil'])->name('estudante.perfil.update');

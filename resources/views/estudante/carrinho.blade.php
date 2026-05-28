@@ -1,99 +1,76 @@
-@extends('aluno.apps')
+@extends('estudant-layouts.apps')
 
 @section('content')
-<section class="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900 py-20 px-6 md:px-12">
-<div class="max-w-6xl mx-auto">
+<div class="pagetitle">
+    <h1>Carrinho</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Painel</a></li>
+            <li class="breadcrumb-item active">Carrinho</li>
+        </ol>
+    </nav>
+</div>
 
-    <h1 class="text-4xl font-bold mb-10 text-white">
-        🛒 Seu Carrinho
-    </h1>
-
+<section class="section">
     @if(session('success'))
-        <div class="bg-green-500 text-white p-4 rounded mb-6 shadow">
-            {{ session('success') }}
-        </div>
+        <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
     @if(count($carrinho) > 0)
-
-    <div class="grid md:grid-cols-3 gap-8">
-
-        <!-- LISTA -->
-        <div class="md:col-span-2 space-y-6">
-
-            @php $total = 0; @endphp
-
-            @foreach($carrinho as $id => $item)
-                @php $total += $item['preco']; @endphp
-
-                <div class="bg-white/95 backdrop-blur-md p-6 rounded-2xl shadow-lg flex gap-6 items-center hover:scale-[1.01] transition">
-
-                    <img src="{{ Storage::url($item['foto']) }}"
-                         class="w-28 h-20 object-cover rounded-lg shadow">
-
-                    <div class="flex-1">
-                        <h2 class="font-bold text-lg text-slate-800">
-                            {{ $item['titulo'] }}
-                        </h2>
-
-                        <p class="text-blue-600 font-semibold mt-2 text-lg">
-                            {{ number_format($item['preco'], 2, ',', '.') }} Kz
-                        </p>
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        @php $total = 0; @endphp
+                        <div class="list-group list-group-flush">
+                            @foreach($carrinho as $id => $item)
+                                @php $total += $item['preco']; @endphp
+                                <div class="list-group-item student-list-item px-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="{{ !empty($item['foto']) ? Storage::url($item['foto']) : asset('assets/img/logo.png') }}" alt="{{ $item['titulo'] }}" style="width: 92px; height: 68px; object-fit: cover; border-radius: 8px;">
+                                        <div class="flex-grow-1">
+                                            <h6 class="fw-bold mb-1">{{ $item['titulo'] }}</h6>
+                                            <strong class="text-primary">{{ number_format($item['preco'], 2, ',', '.') }} Kz</strong>
+                                        </div>
+                                        <form action="{{ route('carrinho.remove') }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="curso_id" value="{{ $id }}">
+                                            <button class="btn btn-outline-danger btn-sm" type="submit">
+                                                Remover
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-
-                    <!-- REMOVER -->
-                    <form action="{{ route('estudante.remove') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="curso_id" value="{{ $id }}">
-                        <button class="text-red-500 hover:text-red-700 font-semibold transition">
-                            Remover
-                        </button>
-                    </form>
-
                 </div>
-
-            @endforeach
-
-        </div>
-
-        <!-- RESUMO -->
-        <div class="bg-white/95 backdrop-blur-md p-8 rounded-2xl shadow-2xl h-fit border border-white/30">
-
-            <h3 class="text-xl font-bold mb-6 text-slate-800">Resumo</h3>
-
-            <div class="flex justify-between mb-6 text-lg">
-                <span class="text-slate-600">Total:</span>
-                <span class="font-bold text-2xl text-blue-600">
-                    {{ number_format($total, 2, ',', '.') }} Kz
-                </span>
             </div>
 
-            <a href="{{ route('pagamento') }}"
-   class="w-full block text-center bg-blue-600 text-white py-4 rounded-lg font-bold hover:bg-blue-700 transition">
-    Finalizar Compra
-</a>
-
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Resumo</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="text-muted">Total</span>
+                            <strong class="fs-4 text-primary">{{ number_format($total, 2, ',', '.') }} Kz</strong>
+                        </div>
+                        <a href="{{ route('pagamento') }}" class="btn btn-primary w-100">
+                            Finalizar compra
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-
-    </div>
-
     @else
-
-    <!-- VAZIO -->
-    <div class="text-center py-24 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg">
-        <p class="text-gray-300 text-lg mb-4">
-            Seu carrinho está vazio 😢
-        </p>
-
-        <a href="{{ url('/') }}"
-           class="text-blue-400 font-semibold hover:underline">
-            Ver cursos
-        </a>
-    </div>
-
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-cart-x display-5 text-muted"></i>
+                <h5 class="mt-3">Seu carrinho está vazio</h5>
+                <p class="text-muted">Adicione cursos para continuar a inscrição.</p>
+                <a href="{{ route('home.catalogo') }}" class="btn btn-primary">Ver cursos</a>
+            </div>
+        </div>
     @endif
-
-</div>
 </section>
-
 @endsection

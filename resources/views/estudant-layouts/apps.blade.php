@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-AO">
 
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
-  <title>PARUANA comercial</title>
+  <title>Área do Aluno | Paruana Comercial</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -25,17 +25,18 @@
 
   <!-- Template Main CSS File -->
   <link href="{{asset('assets/css/style.css')}}" rel="stylesheet">
+  <link href="{{asset('assets/css/student.css')}}" rel="stylesheet">
 
 </head>
 
-<body>
+<body class="student-shell">
 
   <!-- ======= Header ======= -->
   @include('estudant-layouts.header')
 
   <!-- ======= Sidebar ======= -->
   @include('estudant-layouts.aside')
-  <main id="main" class="main">
+  <main id="main" class="main student-main">
     @include('estudant-layouts.alert')
     @yield('content')
     

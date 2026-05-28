@@ -1,94 +1,80 @@
 @extends('estudant-layouts.apps')
 
 @section('content')
+@php
+    $courseImage = $cursos->foto ? Storage::url($cursos->foto) : asset('assets/img/logo.png');
+@endphp
 
-<section class="py-24 px-6 md:px-12 bg-gradient-to-br from-blue-950 to-slate-900 text-white">
-<div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-
-    <!-- INFO -->
-    <div>
-
-        <!-- Categoria -->
-        <span class="bg-white/10 px-4 py-1 rounded-full text-xs uppercase">
-            {{ $cursos->categoria->nome ?? 'Curso' }}
-        </span>
-
-        <!-- Título -->
-        <h1 class="text-5xl font-bold mt-6 mb-6">
-            {{ $cursos->titulo }}
-        </h1>
-
-        <!-- Descrição -->
-        <p class="text-white/80 mb-8 leading-relaxed">
-            {{ $cursos->descricao }}
-        </p>
-
-        <!-- Stats -->
-        <div class="flex gap-8 mb-10">
-
-            <div>
-                <div class="text-2xl font-bold">{{ $cursos->duracao_horas }}h</div>
-                <div class="text-sm text-white/60">Duração</div>
-            </div>
-
-            <div>
-                <div class="text-2xl font-bold">Certificado</div>
-                <div class="text-sm text-white/60">Incluído</div>
-            </div>
-
-        </div>
-
-        <!-- Formador -->
-        <div class="mb-10">
-            <h3 class="font-semibold text-white/70">Instrutor</h3>
-            <p class="text-xl font-bold">
-                {{ $cursos->formador->pessoa->primeironome ?? 'Instrutor' }}
-            </p>
-        </div>
-
-    </div>
-
-    <!-- CARD COMPRA -->
-    <div class="bg-white text-slate-900 rounded-2xl p-8 shadow-2xl">
-
-        <!-- Imagem -->
-        <img src="{{ Storage::url($cursos->foto) }}"
-             class="rounded-xl mb-6 w-full h-56 object-cover">
-
-        <!-- Preço -->
-        <div class="mb-6">
-            <span class="text-4xl font-black">
-                {{ number_format($cursos->preco, 2, ',', '.') }} Kz
-            </span>
-        </div>
-
-        <!-- FORM ADD CARRINHO--> 
-        <form action="{{ route('estudante.add') }}" method="POST">
-            @csrf
-            <input type="hidden" name="curso_id" value="{{ $cursos->id }}">
-
-            <button type="submit"
-                class="w-full bg-blue-600 text-white py-4 rounded-lg font-bold hover:bg-blue-700 transition mb-4">
-                Adicionar ao Carrinho
-            </button>
-        </form>
-
-        <!-- Comprar direto -->
-        <a href="#"
-           class="block text-center w-full border border-blue-600 text-blue-600 py-4 rounded-lg font-bold hover:bg-blue-50 transition">
-            Comprar Agora
-        </a>
-
-        <!-- Benefícios -->
-        <ul class="mt-6 text-sm text-gray-600 space-y-2">
-            <li>✔ Acesso vitalício</li>
-            <li>✔ Certificado</li>
-            <li>✔ Suporte</li>
-        </ul>
-
-    </div>
-
+<div class="pagetitle">
+    <h1>{{ $cursos->titulo }}</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Painel</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('home.catalogo') }}">Catálogo</a></li>
+            <li class="breadcrumb-item active">Detalhes</li>
+        </ol>
+    </nav>
 </div>
-</section>
 
+<section class="section">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card student-hero border-0 shadow-sm overflow-hidden">
+                <div class="card-body p-4 p-lg-5 text-white">
+                    <span class="badge bg-light text-primary mb-3">{{ $cursos->categoria->nome ?? 'Curso' }}</span>
+                    <h2 class="fw-bold mb-3">{{ $cursos->titulo }}</h2>
+                    <p class="opacity-75 mb-4">{{ $cursos->descricao }}</p>
+                    <div class="row g-3">
+                        <div class="col-sm-4">
+                            <div class="student-current-course rounded p-3">
+                                <strong>{{ $cursos->duracao_horas ?? 0 }}h</strong>
+                                <small class="d-block opacity-75">Duração</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="student-current-course rounded p-3">
+                                <strong>Certificado</strong>
+                                <small class="d-block opacity-75">Incluído</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="student-current-course rounded p-3">
+                                <strong>{{ $cursos->idioma ?? 'pt-AO' }}</strong>
+                                <small class="d-block opacity-75">Idioma</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card student-course-card border-0 shadow-sm">
+                <img src="{{ $courseImage }}" class="card-img-top" alt="{{ $cursos->titulo }}">
+                <div class="card-body">
+                    <h3 class="fw-bold text-primary mb-3">{{ number_format($cursos->preco, 2, ',', '.') }} Kz</h3>
+                    <form action="{{ route('carrinho.add') }}" method="POST" class="mb-2">
+                        @csrf
+                        <input type="hidden" name="curso_id" value="{{ $cursos->id }}">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-cart-plus me-1"></i> Adicionar ao carrinho
+                        </button>
+                    </form>
+                    <form action="{{ route('carrinho.buy-now') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="curso_id" value="{{ $cursos->id }}">
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            Comprar agora
+                        </button>
+                    </form>
+                    <ul class="list-unstyled text-muted small mt-4 mb-0">
+                        <li class="mb-2"><i class="bi bi-check2-circle text-success me-1"></i> Acesso ao conteúdo</li>
+                        <li class="mb-2"><i class="bi bi-check2-circle text-success me-1"></i> Certificado após aprovação</li>
+                        <li><i class="bi bi-check2-circle text-success me-1"></i> Suporte do formador</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 @endsection

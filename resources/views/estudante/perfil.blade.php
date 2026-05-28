@@ -12,7 +12,7 @@
 </div>
 
 <section class="section">
-    <div class="row">
+    <div class="row g-4">
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
@@ -77,7 +77,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">Formacao</label>
+                            <label class="form-label">Formação</label>
                             <input type="text" name="formacao" value="{{ old('formacao', $estudante->formacao ?? '') }}" class="form-control">
                         </div>
 
@@ -92,6 +92,20 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="student-avatar large">{{ strtoupper(Str::substr($user->name, 0, 1)) }}</span>
+                        <div>
+                            <h5 class="card-title p-0 mb-1">{{ $user->name }}</h5>
+                            <p class="text-muted small mb-0">Perfil de estudante</p>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">Mantenha os dados actualizados para certificados, contactos e acompanhamento dos seus cursos.</p>
                 </div>
             </div>
         </div>

@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CertificadoSolicitacao extends Model
 {
+    public const STATUS_AGUARDANDO_QUESTIONARIO = 'aguardando_questionario';
+    public const STATUS_AGUARDANDO_RESPOSTA = 'aguardando_resposta';
+    public const STATUS_AGUARDANDO_CORRECAO = 'aguardando_correcao';
+    public const STATUS_AGUARDANDO_ADMIN = 'aguardando_admin';
+    public const STATUS_APROVADO = 'aprovado';
+    public const STATUS_REJEITADO = 'rejeitado';
+
     protected $table = 'certificado_solicitacoes';
 
     protected $fillable = [
@@ -52,6 +59,30 @@ class CertificadoSolicitacao extends Model
     {
         // pode haver mais de um se no futuro você permitir reenvio
         return $this->hasMany(CertificadoQuestionario::class, 'solicitacao_id');
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            self::STATUS_AGUARDANDO_QUESTIONARIO => 'Aguardando questionario',
+            self::STATUS_AGUARDANDO_RESPOSTA => 'Aguardando resposta do aluno',
+            self::STATUS_AGUARDANDO_CORRECAO => 'Aguardando correcao do formador',
+            self::STATUS_AGUARDANDO_ADMIN, 'pendente' => 'Aguardando aprovacao do admin',
+            self::STATUS_APROVADO => 'Aprovado',
+            self::STATUS_REJEITADO => 'Rejeitado',
+            default => ucfirst((string) $this->status),
+        };
+    }
+
+    public function statusBadge(): string
+    {
+        return match ($this->status) {
+            self::STATUS_APROVADO => 'success',
+            self::STATUS_REJEITADO => 'danger',
+            self::STATUS_AGUARDANDO_ADMIN, 'pendente' => 'warning',
+            self::STATUS_AGUARDANDO_CORRECAO => 'info',
+            default => 'secondary',
+        };
     }
 }
 

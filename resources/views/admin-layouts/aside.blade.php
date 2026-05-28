@@ -1,78 +1,36 @@
 <aside id="sidebar" class="sidebar">
-
   <ul class="sidebar-nav" id="sidebar-nav">
-
-    <!-- DASHBOARD -->
     <li class="nav-item">
-      <a class="nav-link" href="{{ route('admin.dashboard') }}">
-        <i class="bi bi-grid"></i>
+      <a class="nav-link {{ request()->routeIs('admin.dashboard') ? '' : 'collapsed' }}" href="{{ route('admin.dashboard') }}">
+        <i class="bi bi-speedometer2"></i>
         <span>Dashboard</span>
       </a>
     </li>
-    <!-- AUTENTICAÇÃO -->
+
     <li class="nav-item">
-      <a class="nav-link collapsed" href="{{ route('admin.relatorios') }}">
-        <i class="bi bi-card-list"></i>
-        <span>Relatorio</span>
+      <a class="nav-link {{ request()->routeIs('admin.relatorios') ? '' : 'collapsed' }}" href="{{ route('admin.relatorios') }}">
+        <i class="bi bi-graph-up"></i>
+        <span>Relatórios</span>
       </a>
     </li>
 
-    <!-- PESSOAS -->
+    <li class="nav-heading">Utilizadores</li>
+
     <li class="nav-item">
-      <p class="nav-link collapsed" data-bs-target="#pessoas-nav" data-bs-toggle="collapse">
-        <i class="bi bi-person"></i>
-        <span>Gestão de Usuarios</span>
-        <i class="bi bi-chevron-down ms-auto"></i>
-      </p>
-
-      <ul id="pessoas-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-
-        <!-- FORMADORES -->
-        <li class="nav-item">
-          <a class="nav-link collapsed" href="{{ route('formador.index') }}">
-            <i class="bi bi-person-badge"></i>
-            <span>Formadores</span>
-          </a>
-        </li>
-
-        <!-- ALUNOS -->
-        <li class="nav-item">
-          <a class="nav-link collapsed" href="{{ route('estudante.index') }}">
-            <i class="bi bi-person"></i>
-            <span>Alunos</span>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link collapsed" href="{{ route('admin.administradores.index') }}">
-            <i class="bi bi-shield-lock"></i>
-            <span>Administradores</span>
-          </a>
-        </li>
-
-      </ul>
-    </li>
-
-    <!-- PAGINAS -->
-    <li class="nav-heading">Páginas</li>
-
-    <!-- CERTIFICADOS -->
-    <li class="nav-item">
-      <a class="nav-link collapsed" href="{{ route('admin.certificados.solicitacoes') }}">
-        <i class="bi bi-award"></i>
-        <span>Solicitações de Certificados</span>
+      <a class="nav-link {{ request()->routeIs('formador.index') ? '' : 'collapsed' }}" href="{{ route('formador.index') }}">
+        <i class="bi bi-person-badge"></i>
+        <span>Formadores</span>
       </a>
     </li>
 
-
-    <!-- CATEGORIAS -->
     <li class="nav-item">
-      <a class="nav-link collapsed" href="{{ route('categoria.index') }}">
-        <i class="bi bi-tags"></i>
-        <span> Gestão de Categorias</span>
+      <a class="nav-link {{ request()->routeIs('estudante.index') ? '' : 'collapsed' }}" href="{{ route('estudante.index') }}">
+        <i class="bi bi-people"></i>
+        <span>Alunos</span>
       </a>
     </li>
 
+<<<<<<< HEAD
     <!-- CUPONS -->
     <li class="nav-item">
       <a class="nav-link collapsed" href="{{ route('admin.cupons.index') }}">
@@ -82,54 +40,62 @@
     </li>
 
     <!-- CURSOS -->
+=======
+>>>>>>> 02ed285 (Atualizacao do projeto)
     <li class="nav-item">
-      <a class="nav-link collapsed" href="{{ route('curso.index') }}">
+      <a class="nav-link {{ request()->routeIs('admin.administradores.*') ? '' : 'collapsed' }}" href="{{ route('admin.administradores.index') }}">
+        <i class="bi bi-shield-lock"></i>
+        <span>Administradores</span>
+      </a>
+    </li>
+
+    <li class="nav-heading">Acadêmico</li>
+
+    <li class="nav-item">
+      <a class="nav-link {{ request()->routeIs('curso.index') ? '' : 'collapsed' }}" href="{{ route('curso.index') }}">
         <i class="bi bi-mortarboard"></i>
-        <span>Gestão de Cursos</span>
+        <span>Cursos</span>
       </a>
     </li>
 
-    <!-- AULAS -->
     <li class="nav-item">
-      <a class="nav-link collapsed" href="{{ route('aula.index') }}">
+      <a class="nav-link {{ request()->routeIs('aula.index') ? '' : 'collapsed' }}" href="{{ route('aula.index') }}">
         <i class="bi bi-journal-text"></i>
-        <span>Gestão de Aulas</span>
+        <span>Aulas</span>
       </a>
     </li>
 
-    <!-- FAQ -->
     <li class="nav-item">
-      <a class="nav-link collapsed" href="#">
-        <i class="bi bi-question-circle"></i>
-        <span>Perguntas Frequentes</span>
+      <a class="nav-link {{ request()->routeIs('categoria.index') ? '' : 'collapsed' }}" href="{{ route('categoria.index') }}">
+        <i class="bi bi-tags"></i>
+        <span>Categorias</span>
       </a>
     </li>
 
-    <!-- CONTACTOS -->
     <li class="nav-item">
-      <a class="nav-link collapsed" href="#">
-        <i class="bi bi-envelope"></i>
-        <span>Contactos</span>
+      <a class="nav-link {{ request()->routeIs('admin.certificados.*') ? '' : 'collapsed' }}" href="{{ route('admin.certificados.solicitacoes') }}">
+        <i class="bi bi-award"></i>
+        <span>Certificados</span>
       </a>
     </li>
 
-    
+    <li class="nav-heading">Plataforma</li>
 
-    <!-- REDES -->
     <li class="nav-item">
-      <a class="nav-link collapsed" href="#">
-        <i class="bi bi-facebook"></i>
-        <span>Redes Sociais</span>
-      </a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-link collapsed" href="{{ route('logout') }}">
-        <i class="bi bi-box-arrow-in-right"></i>
-        <span>Sair</span>
+      <a class="nav-link collapsed" href="{{ route('home') }}">
+        <i class="bi bi-house"></i>
+        <span>Ver site</span>
       </a>
     </li>
 
+    <li class="nav-item">
+      <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button class="nav-link collapsed border-0 bg-transparent w-100 text-start" type="submit">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>Sair</span>
+        </button>
+      </form>
+    </li>
   </ul>
-
 </aside>

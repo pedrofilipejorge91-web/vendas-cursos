@@ -14,7 +14,7 @@
 <section class="section dashboard">
     <div class="row g-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card student-hero border-0 shadow-sm overflow-hidden">
                 <div class="card-body p-4 p-lg-5 bg-primary text-white">
                     <div class="row align-items-center g-4">
                         <div class="col-lg-8">
@@ -27,7 +27,7 @@
                         </div>
                         <div class="col-lg-4">
                             @if($matriculaActual)
-                                <div class="bg-white bg-opacity-10 rounded p-4">
+                                <div class="student-current-course rounded p-4">
                                     <p class="small text-uppercase fw-bold opacity-75 mb-2">Curso actual</p>
                                     <h5 class="fw-bold">{{ $matriculaActual->curso->titulo }}</h5>
                                     <div class="progress mt-3" style="height: 8px;">
@@ -36,7 +36,7 @@
                                     <p class="mt-2 mb-0 small">{{ number_format($matriculaActual->progresso, 0) }}% concluído</p>
                                 </div>
                             @else
-                                <div class="bg-white bg-opacity-10 rounded p-4">
+                                <div class="student-current-course rounded p-4">
                                     <h5 class="fw-bold">Ainda sem cursos</h5>
                                     <p class="mb-0 small opacity-75">Escolha um curso no catálogo para começar.</p>
                                 </div>
@@ -102,7 +102,7 @@
 
                     <div class="list-group list-group-flush">
                         @forelse($matriculas->take(5) as $matricula)
-                            <a href="{{ route('estudante.curso', $matricula) }}" class="list-group-item list-group-item-action px-0">
+                            <a href="{{ route('estudante.curso', $matricula) }}" class="list-group-item list-group-item-action student-list-item px-3">
                                 <div class="d-flex justify-content-between gap-3">
                                     <div>
                                         <h6 class="mb-1 fw-bold">{{ $matricula->curso->titulo }}</h6>

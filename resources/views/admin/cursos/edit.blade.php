@@ -1,188 +1,194 @@
-        <!-- Modal Create Curso -->
-<div class="modal fade" id="edit-{{$curso->id}}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
+<!-- Modal Editar Curso -->
+<div class="modal fade" id="edit-{{$curso->id}}" tabindex="-1" aria-labelledby="editCursoLabel-{{$curso->id}}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
             
-            <!-- Header -->
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-plus-circle me-2"></i>Novo Curso
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <!-- Header Estilizado (Cor de Edição) -->
+            <div class="modal-header bg-warning py-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                        <i class="bi bi-pencil-square fs-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0 text-white" id="editCursoLabel-{{$curso->id}}">Editar Curso</h5>
+                        <small class="text-white-50">ID do Registro: #{{ $curso->id }}</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <!-- Form -->
-            <form action="{{ Auth::user()?->tipo === 'formador' ? route('formador.cursos.update', $curso->id) : route('curso.update', $curso->id) }}" method="POST" enctype="multipart/form-data" data-ajax="true" data-ajax-refresh="#curso-table-wrapper">
+            <form action="{{ Auth::user()?->tipo === 'formador' ? route('formador.cursos.update', $curso->id) : route('curso.update', $curso->id) }}" 
+                  method="POST" 
+                  enctype="multipart/form-data" 
+                  data-ajax="true" 
+                  data-ajax-refresh="#curso-table-wrapper">
                 @csrf
-                  @method('PUT')
+                @method('PUT')
                 
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     
-                    <!-- Mensagens de Erro -->
+                    <!-- Erros de Validação -->
                     @if ($errors->any())
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
-                            <strong>Atenção!</strong> Verifique os campos abaixo:
-                            <ul class="mb-0 mt-2 small">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <div class="alert alert-danger border-0 shadow-sm mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-exclamation-octagon me-2 fs-5"></i>
+                                <strong class="small">Corrija os erros destacados nos campos.</strong>
+                            </div>
                         </div>
                     @endif
 
-                    <div class="row g-3">
+                    <div class="row g-4">
                         
-                        <!-- Título do Curso -->
-                        <div class="col-md-8">
-                            <div class="form-floating">
-                                <input type="text" 
-                                       class="form-control @error('titulo') is-invalid @enderror" 
-                                       id="floatingTitulo" 
-                                       name="titulo" 
-                                       placeholder="Ex: Introdução ao Laravel"
-                                       value="{{ old('titulo', $curso->titulo) }}">
-                                <label for="floatingTitulo">Título do Curso *</label>
-                                @error('titulo')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Duração (Horas) -->
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input type="number" 
-                                       class="form-control @error('duracao_horas') is-invalid @enderror" 
-                                       id="floatingDuracao" 
-                                       name="duracao_horas" 
-                                       placeholder="Ex: 20"
-                                       value="{{ old('duracao_horas', $curso->duracao_horas) }}"
-                                       min="1"
-                                       required>
-                                <label for="floatingDuracao">Duração (horas) *</label>
-                                @error('duracao_horas')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <select class="form-select" name="idioma" required>
-                                    <option value="pt-AO" {{ old('idioma', $curso->idioma) === 'pt-AO' ? 'selected' : '' }}>Portugues de Angola</option>
-                                    <option value="pt-PT" {{ old('idioma', $curso->idioma) === 'pt-PT' ? 'selected' : '' }}>Portugues</option>
-                                    <option value="en" {{ old('idioma', $curso->idioma) === 'en' ? 'selected' : '' }}>Ingles</option>
-                                    <option value="fr" {{ old('idioma', $curso->idioma) === 'fr' ? 'selected' : '' }}>Frances</option>
-                                </select>
-                                <label>Idioma *</label>
-                            </div>
-                        </div>
-
-                        <!-- Descrição (Textarea) -->
+                        <!-- SEÇÃO 1: IDENTIFICAÇÃO -->
                         <div class="col-12">
-                            <div class="form-floating">
-                                <textarea class="form-control @error('descricao') is-invalid @enderror" 
-                                          placeholder="Descreva o conteúdo do curso..." 
-                                          id="floatingDescricao" 
-                                          name="descricao" 
-                                          style="height: 120px"
-                                          required>{{ old('descricao', $curso->descricao) }}</textarea>
-                                <label for="floatingDescricao">Descrição do Curso *</label>
-                                @error('descricao')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <h6 class="text-warning fw-bold text-uppercase small mb-3"><i class="bi bi-tag me-2"></i>Identificação</h6>
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control border-0 bg-light" id="editTitulo-{{$curso->id}}" name="titulo" placeholder="Título" value="{{ old('titulo', $curso->titulo) }}" required>
+                                        <label for="editTitulo-{{$curso->id}}">Título do Curso *</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select border-0 bg-light" name="categoria_id" required>
+                                            @foreach($categorias as $categoria)
+                                                <option value="{{ $categoria->id }}" {{ old('categoria_id', $curso->categoria_id) == $categoria->id ? 'selected' : '' }}>
+                                                    {{ $categoria->nome }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <label>Categoria</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select border-0 bg-light" name="idioma" required>
+                                            <option value="pt-AO" {{ old('idioma', $curso->idioma) === 'pt-AO' ? 'selected' : '' }}>Português (Angola)</option>
+                                            <option value="pt-PT" {{ old('idioma', $curso->idioma) === 'pt-PT' ? 'selected' : '' }}>Português (Portugal)</option>
+                                            <option value="en" {{ old('idioma', $curso->idioma) === 'en' ? 'selected' : '' }}>Inglês</option>
+                                            <option value="fr" {{ old('idioma', $curso->idioma) === 'fr' ? 'selected' : '' }}>Francês</option>
+                                        </select>
+                                        <label>Idioma</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Preço -->
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input type="number" 
-                                       class="form-control @error('preco') is-invalid @enderror" 
-                                       id="floatingPreco" 
-                                       name="preco" 
-                                       placeholder="0.00"
-                                      value="{{ old('preco', $curso->preco) }}"
-                                       step="0.01"
-                                       min="0"
-                                       required>
-                                <label for="floatingPreco">Preço (Kz) *</label>
-                                @error('preco')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Status -->
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <select class="form-select @error('status') is-invalid @enderror" 
-                                        id="floatingStatus" 
-                                        name="status"
-                                        required>
-                                     <option value="rascunho" {{ old('status', $curso->status) == 'rascunho' ? 'selected' : '' }}>Rascunho</option>
-                                        <option value="publicado" {{ old('status', $curso->status) == 'publicado'? 'selected' : '' }}>Publicado</option>
-                                        <option value="inativo" {{ old('status', $curso->status) == 'inativo' ? 'selected' : '' }}>Inativo</option>
-                                </select>
-                                <label for="floatingStatus">Status *</label>
-                                @error('status')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-
-                        <!-- Categoria -->
-<select class="form-select" name="categoria_id" required>
-    <option value="" selected disabled>Selecione...</option>
-    @foreach($categorias as $categoria)
-        <!-- ✅ USAR $categoria->id (não categoria_id) -->
-        <option value="{{ $categoria->id }}" 
- {{ old('categoria_id', $curso->categoria_id) == $categoria->id ? 'selected' : '' }}>            {{ $categoria->nome }}
-        </option>
-    @endforeach
-</select>
-
-@if(Auth::user()?->tipo !== 'formador')
-<!-- Formador -->
-<select class="form-select" name="formador_id" required>
-    <option value="" selected disabled>Selecione o formador</option>
-    @foreach($formadores as $formador)
-        <!-- ✅ USAR $formador->id (não formador_id) -->
-        <option value="{{ $formador->id }}" 
-        {{ old('formador_id', $curso->formador_id) == $formador->id ? 'selected' : '' }}>
-            {{ $formador->pessoa->primeironome ?? $formador->primeironome }}
-            {{ $formador->pessoa->segundonome ?? $formador->segundonome }}
-        </option>
-    @endforeach
-</select>
-@endif
-
-                        <!-- Capa do Curso (Opcional) -->
+                        <!-- SEÇÃO 2: VALORES E RESPONSABILIDADE -->
                         <div class="col-12">
-                            <label for="floatingCapa" class="form-label fw-bold">
-                                <i class="bi bi-image me-1"></i>Capa do Curso (Opcional)
-                            </label>
-                            <input class="form-control @error('capa') is-invalid @enderror" 
-                                   type="file" 
-                                   id="floatingCapa" 
-                                   name="capa" 
-                                   accept="image/*">
-                            @error('capa')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
+                            <h6 class="text-warning fw-bold text-uppercase small mb-3"><i class="bi bi-cash-coin me-2"></i>Configurações</h6>
+                            <div class="row g-3 p-3 bg-light rounded-3 mx-0 shadow-sm border-start border-warning border-4">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Preço (AOA)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-0 fw-bold">Kz</span>
+                                        <input type="number" name="preco" class="form-control border-0" step="0.01" value="{{ old('preco', $curso->preco) }}" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Duração (Horas)</label>
+                                    <div class="input-group">
+                                        <input type="number" name="duracao_horas" class="form-control border-0 text-center" value="{{ old('duracao_horas', $curso->duracao_horas) }}" required>
+                                        <span class="input-group-text bg-white border-0 small">Hrs</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Status do Curso</label>
+                                    <select class="form-select border-0" name="status" required>
+                                        <option value="rascunho" {{ old('status', $curso->status) == 'rascunho' ? 'selected' : '' }}>📝 Rascunho</option>
+                                        <option value="publicado" {{ old('status', $curso->status) == 'publicado' ? 'selected' : '' }}>🚀 Publicado</option>
+                                        <option value="inativo" {{ old('status', $curso->status) == 'inativo' ? 'selected' : '' }}>🔒 Inativo</option>
+                                    </select>
+                                </div>
+
+                                @if(Auth::user()?->tipo !== 'formador')
+                                <div class="col-12 mt-3 border-top pt-2">
+                                    <label class="form-label small fw-bold">Formador Designado</label>
+                                    <select class="form-select border-0 bg-white shadow-sm" name="formador_id" required>
+                                        @foreach($formadores as $formador)
+                                            <option value="{{ $formador->id }}" {{ old('formador_id', $curso->formador_id) == $formador->id ? 'selected' : '' }}>
+                                                {{ $formador->pessoa->primeironome ?? $formador->primeironome }} {{ $formador->pessoa->segundonome ?? $formador->segundonome }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- SEÇÃO 3: DESCRIÇÃO E IMAGEM -->
+                        <div class="col-12">
+                            <h6 class="text-warning fw-bold text-uppercase small mb-3"><i class="bi bi-card-image me-2"></i>Apresentação Visual</h6>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control border-0 bg-light" id="editDesc-{{$curso->id}}" name="descricao" style="height: 100px" required>{{ old('descricao', $curso->descricao) }}</textarea>
+                                        <label for="editDesc-{{$curso->id}}">Descrição Completa do Curso *</label>
+                                    </div>
+                                </div>
+
+                                <!-- Preview da Imagem Atual -->
+                                <div class="col-md-4">
+                                    <div class="p-2 border rounded text-center bg-white">
+                                        <small class="text-muted d-block mb-2 small fw-bold">Capa Atual</small>
+                                        <img src="{{ $curso->foto ? Storage::url($curso->foto) : asset('assets/img/course-placeholder.jpg') }}" 
+                                             class="img-fluid rounded shadow-sm" 
+                                             style="max-height: 100px; width: 100%; object-fit: cover;">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label class="form-label fw-bold small">Alterar Foto de Capa (Opcional)</label>
+                                    <div class="input-group">
+                                        <input type="file" class="form-control border-0 bg-light" name="capa" accept="image/*">
+                                        <span class="input-group-text bg-warning text-white border-0"><i class="bi bi-upload"></i></span>
+                                    </div>
+                                    <div class="form-text mt-1 small">Deixe em branco para manter a imagem atual.</div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
                 </div>
 
-                   <div class="text-center mb-4">
-                      <button type="submit" class="btn btn-primary">Salvar Actualização</button>
-                    </div>
+                <!-- Footer -->
+                <div class="modal-footer border-top-0 bg-light py-3">
+                    <button type="button" class="btn btn-link text-muted fw-bold text-decoration-none" data-bs-dismiss="modal">Descartar</button>
+                    <button type="submit" class="btn btn-warning px-5 py-2 fw-bold text-dark shadow-sm">
+                        <i class="bi bi-cloud-arrow-up me-2"></i>Actualizar Registro
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    /* Ajustes específicos para o Modal de Edição */
+    #edit-{{$curso->id}} .modal-content {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    #edit-{{$curso->id}} .form-control:focus, 
+    #edit-{{$curso->id}} .form-select:focus {
+        background-color: #fff !important;
+        border: 1px solid #ffc107 !important;
+        box-shadow: 0 4px 10px rgba(255, 193, 7, 0.1) !important;
+    }
+
+    #edit-{{$curso->id}} .input-group-text {
+        border-radius: 8px 0 0 8px;
+    }
+
+    /* Animação suave ao abrir */
+    .modal.fade .modal-dialog {
+        transition: transform 0.3s ease-out;
+    }
+</style>

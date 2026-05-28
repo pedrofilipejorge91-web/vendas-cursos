@@ -32,7 +32,7 @@
     <div class="certificate">
         <div class="content">
             <div class="header">
-                <div class="institution-name">{{ $centro['nome'] ?? 'Centro de Formacao Paruana Comercial' }}</div>
+                <div class="institution-name">{{ $centro['nome'] ?? 'Centro de Formação Paruana Comercial' }}</div>
                 <div class="subtitle">Plataforma de Educacao e Certificacao</div>
                 <div class="subtitle">
                     {{ $centro['endereco'] ?? 'Angola' }}
@@ -74,7 +74,7 @@
             <div class="signature-section">
                 <div class="signature-line">
                     <p style="font-weight: bold;">Diretor Geral</p>
-                    <p style="font-size: 10px;">{{ $centro['nome'] ?? 'Centro de Formacao Paruana Comercial' }}</p>
+                    <p style="font-size: 10px;">{{ $centro['nome'] ?? 'Centro de Formação Paruana Comercial' }}</p>
                 </div>
                 <div class="signature-line">
                     <p style="font-weight: bold;">{{ $matricula->curso->formador->pessoa->primeironome ?? 'Formador' }}</p>

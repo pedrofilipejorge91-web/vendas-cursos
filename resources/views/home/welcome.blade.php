@@ -5,179 +5,244 @@
     $heroCurso = $cursosDestaque->first();
     $heroImagem = $heroCurso?->foto ? Storage::url($heroCurso->foto) : asset('assets/img/logo.png');
     $formatarNumero = fn ($valor) => $valor > 999 ? number_format($valor / 1000, 1, ',', '.') . 'k+' : $valor;
+    $paruanaImages = [
+        ['src' => asset('assets/img/paruana/hero-paruana.jpg'), 'title' => 'Centro de Formação Paruana', 'copy' => 'Formamos hoje, transformamos o amanha'],
+        ['src' => asset('assets/img/paruana/promo-cursos.jpg'), 'title' => 'Cursos em promocao', 'copy' => 'Novas oportunidades de capacitacao profissional'],
+        ['src' => asset('assets/img/paruana/turma-paruana.jpg'), 'title' => 'Turmas certificadas', 'copy' => 'Alunos preparados para novos desafios'],
+        ['src' => asset('assets/img/paruana/certificados-grupo.jpg'), 'title' => 'Certificados entregues', 'copy' => 'Reconhecimento do percurso de aprendizagem'],
+        ['src' => asset('assets/img/paruana/entrega-certificado.jpg'), 'title' => 'Entrega de diplomas', 'copy' => 'Momentos reais da comunidade Paruana'],
+        ['src' => asset('assets/img/paruana/electricidade-pratica.jpg'), 'title' => 'Electricidade pratica', 'copy' => 'Aprendizagem aplicada com trabalhos reais'],
+        ['src' => asset('assets/img/paruana/informatica-pratica.jpg'), 'title' => 'Informatica pratica', 'copy' => 'Tecnologia e competencias para o mercado'],
+        ['src' => asset('assets/img/paruana/stand-formacao.jpg'), 'title' => 'Inscricoes abertas', 'copy' => 'Atendimento e orientacao para novos alunos'],
+        ['src' => asset('assets/img/paruana/artesanato-alunas.jpg'), 'title' => 'Cursos praticos', 'copy' => 'Formação com actividades de producao'],
+    ];
+
+    $servicos = $categorias->map(function ($categoria) {
+        return [
+            'titulo' => $categoria->nome,
+            'descricao' => 'Programas praticos para desenvolver competencias valorizadas no mercado.',
+            'icon' => 'bi-mortarboard',
+            'link' => route('home.categorias', $categoria->id),
+            'items' => ['Aulas orientadas', 'Certificado', 'Suporte do formador'],
+        ];
+    });
+
+    if ($servicos->isEmpty()) {
+        $servicos = collect([
+            ['titulo' => 'Consultoria e formação', 'descricao' => 'Percursos de aprendizagem para empresas e profissionais.', 'icon' => 'bi-building', 'link' => route('home.catalogo'), 'items' => ['Gestao', 'Tecnologia', 'Financas']],
+            ['titulo' => 'Treinamento profissional', 'descricao' => 'Conteudos objectivos para aplicacao directa no trabalho.', 'icon' => 'bi-layers', 'link' => route('home.catalogo'), 'items' => ['Estudo guiado', 'Exercicios', 'Mentoria']],
+            ['titulo' => 'Cursos online', 'descricao' => 'Acesso flexivel a aulas, materiais e certificado.', 'icon' => 'bi-laptop', 'link' => route('home.catalogo'), 'items' => ['Video aulas', 'Materiais', 'Certificado']],
+        ]);
+    }
+
+    $blogPosts = [
+        ['tag' => 'Destaque', 'data' => '21 Marco 2025', 'titulo' => 'Formação profissional que aproxima alunos do mercado', 'texto' => 'Programas focados em competencias praticas ajudam os alunos a ganhar confianca e preparar melhor a sua entrada no mercado.'],
+        ['tag' => 'Feira', 'data' => '13 Junho 2025', 'titulo' => 'Paruana em exposicao de cursos e tecnologia', 'texto' => 'Participamos em encontros de inovacao para apresentar solucoes educacionais e novas oportunidades de aprendizagem.'],
+        ['tag' => 'Exposicao', 'data' => '03 Maio 2025', 'titulo' => 'Cursos em destaque para novos profissionais', 'texto' => 'Novas turmas combinam aulas praticas, suporte e certificacao para acelerar o crescimento profissional.'],
+    ];
 @endphp
 
-<section class="relative min-h-[720px] flex items-center overflow-hidden">
-    <div class="absolute inset-0 z-0">
-        <img alt="Centro de Formação Paruana Comercial" class="w-full h-full object-cover" src="{{ $heroImagem }}">
-        <div class="absolute inset-0 bg-gradient-to-r from-primary via-primary/85 to-primary/20"></div>
+<section id="inicio" class="hero-section" style="--hero-bg: url('{{ asset('assets/img/paruana/hero-paruana.jpg') }}')">
+    <div class="hero-visual" aria-hidden="true">
+        <div class="hero-grid-lines"></div>
+        <div class="chart chart-one"></div>
+        <div class="chart chart-two"></div>
+        <div class="chart chart-three"></div>
+        <div class="hero-card-mini">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Aprendizagem em crescimento</span>
+        </div>
     </div>
 
-    <div class="relative z-10 max-w-7xl mx-auto px-6 md:px-8 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 py-28">
-        <div class="space-y-8 max-w-2xl">
-            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-white text-xs font-bold uppercase tracking-widest backdrop-blur">
-                Formação profissional em Angola
-            </span>
-
-            <h1 class="text-4xl md:text-7xl font-bold text-white leading-tight tracking-tight">
-                Aprenda competências práticas para crescer no mercado angolano
-            </h1>
-
-            <p class="text-lg md:text-xl text-slate-200/90 font-light leading-relaxed max-w-xl">
-                Cursos com instrutores locais, certificado digital e pagamentos adaptados à realidade de Angola.
-            </p>
-
-            <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                <a href="{{ route('home.catalogo') }}" class="bg-surface-container-lowest text-primary px-8 py-4 rounded-md font-bold text-lg hover:bg-surface-bright transition-all academic-monolith-shadow text-center">
-                    Explorar cursos
-                </a>
-                @if($heroCurso)
-                    <a href="{{ route('home.detalhe', $heroCurso->id) }}" class="border border-white/30 text-white px-8 py-4 rounded-md font-semibold text-lg backdrop-blur-md hover:bg-white/10 transition-all text-center">
-                        Curso em destaque
-                    </a>
-                @endif
-            </div>
+    <div class="site-container hero-content">
+        <p class="eyebrow">Centro de formação Paruana Comercial</p>
+        <h1>Formação profissional para transformar a sua carreira.</h1>
+        <p class="hero-copy">Cursos praticos, formadores experientes, acompanhamento e certificado para alunos e empresas em Angola.</p>
+        <div class="hero-actions">
+            <a href="{{ route('home.catalogo') }}" class="btn-hero-primary">Comece seu curso agora</a>
+            <a href="#servicos" class="btn-hero-secondary">Ver servicos</a>
         </div>
     </div>
 </section>
 
-<section class="bg-surface-container-low py-16">
-    <div class="max-w-7xl mx-auto px-6 md:px-8">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            <div class="space-y-2">
-                <div class="text-4xl md:text-5xl font-extrabold text-primary tracking-tighter">{{ $formatarNumero($metricas['alunos']) }}</div>
-                <div class="text-sm font-semibold uppercase tracking-widest text-on-surface-variant">Alunos matriculados</div>
+<section id="sobre" class="about-section">
+    <div class="site-container about-grid">
+        <div class="about-media">
+            <div class="about-image-card photo">
+                <img src="{{ asset('assets/img/paruana/certificados-grupo.jpg') }}" alt="Alunos certificados pela Paruana">
             </div>
-            <div class="space-y-2">
-                <div class="text-4xl md:text-5xl font-extrabold text-primary tracking-tighter">{{ $metricas['cursos'] }}</div>
-                <div class="text-sm font-semibold uppercase tracking-widest text-on-surface-variant">Cursos publicados</div>
+        </div>
+        <div class="about-copy">
+            <p class="section-kicker">Paruana Comercial</p>
+            <h2>Optima solucao para quem quer aprender e crescer.</h2>
+            <p>A Paruana Comercial oferece cursos e formacoes pensadas para a realidade do mercado. Ajudamos alunos e profissionais a desenvolver competencias praticas, com acompanhamento de formadores e foco em resultados.</p>
+            <div class="about-features">
+                <span><i class="bi bi-check-lg"></i> Certificado</span>
+                <span><i class="bi bi-check-lg"></i> Formadores experientes</span>
+                <span><i class="bi bi-check-lg"></i> Cursos actualizados</span>
+                <span><i class="bi bi-check-lg"></i> Suporte ao aluno</span>
             </div>
-            <div class="space-y-2">
-                <div class="text-4xl md:text-5xl font-extrabold text-primary tracking-tighter">{{ $metricas['formadores'] }}</div>
-                <div class="text-sm font-semibold uppercase tracking-widest text-on-surface-variant">Instrutores</div>
-            </div>
-            <div class="space-y-2">
-                <div class="text-4xl md:text-5xl font-extrabold text-primary tracking-tighter">{{ $metricas['avaliacao'] ?: '0' }}/5</div>
-                <div class="text-sm font-semibold uppercase tracking-widest text-on-surface-variant">Avaliação média</div>
-            </div>
+            <a href="{{ route('home.catalogo') }}" class="text-link">Ver cursos <i class="bi bi-arrow-right"></i></a>
         </div>
     </div>
 </section>
 
-<section id="categorias" class="py-28 bg-surface">
-    <div class="max-w-7xl mx-auto px-6 md:px-8">
-        <div class="mb-14 space-y-4">
-            <span class="inline-block px-4 py-1 rounded-full bg-secondary-container text-on-secondary-fixed text-xs font-bold uppercase tracking-widest">Áreas de formação</span>
-            <h2 class="text-4xl md:text-5xl font-bold text-primary tracking-tight">Explore por categoria</h2>
+<section id="servicos" class="section-panel services-section">
+    <div class="site-container">
+        <div class="section-heading">
+            <p class="section-kicker">O que oferecemos?</p>
+            <h2>Nossos servicos</h2>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            @forelse($categorias as $categoria)
-                <a href="{{ route('home.categorias', $categoria->id) }}" class="group bg-surface-container-lowest rounded-xl p-8 academic-monolith-shadow transition-transform hover:-translate-y-1">
-                    <span class="material-symbols-outlined text-primary text-4xl mb-8 block">school</span>
-                    <h3 class="text-2xl font-bold text-primary mb-3">{{ $categoria->nome }}</h3>
-                    <p class="text-on-surface-variant text-sm min-h-12">
-                        {{ $categoria->descricao ?: 'Cursos práticos preparados para evolução profissional.' }}
-                    </p>
-                    <div class="mt-8 flex items-center justify-between">
-                        <span class="text-sm font-bold text-on-surface-variant">{{ $categoria->cursos_count }} curso(s)</span>
-                        <span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </div>
-                </a>
-            @empty
-                <div class="md:col-span-3 bg-white rounded-xl p-10 text-center academic-monolith-shadow">
-                    <p class="text-on-surface-variant">Ainda não há categorias cadastradas.</p>
-                </div>
-            @endforelse
+        <div class="service-grid">
+            @foreach($servicos->take(5) as $servico)
+                <article class="service-card">
+                    <i class="bi {{ $servico['icon'] }}"></i>
+                    <h3>{{ $servico['titulo'] }}</h3>
+                    <p>{{ $servico['descricao'] }}</p>
+                    <ul>
+                        @foreach($servico['items'] as $item)
+                            <li><i class="bi bi-check2"></i>{{ $item }}</li>
+                        @endforeach
+                    </ul>
+                    <a href="{{ $servico['link'] }}">Saiba mais <i class="bi bi-chevron-right"></i></a>
+                </article>
+            @endforeach
+        </div>
+
+        <div class="section-more">
+            <a href="{{ route('home.catalogo') }}">Descubra nossos cursos <i class="bi bi-arrow-right"></i></a>
         </div>
     </div>
 </section>
 
-<section id="cursos" class="py-28 bg-surface-container-low">
-    <div class="max-w-7xl mx-auto px-6 md:px-8">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-6">
-            <div class="space-y-4">
-                <h2 class="text-4xl md:text-5xl font-bold text-primary tracking-tight">Cursos em destaque</h2>
-                <p class="text-on-surface-variant max-w-xl">Programas publicados e prontos para inscrição, ordenados pela procura dos alunos.</p>
-            </div>
-            <a href="{{ route('home.catalogo') }}" class="text-primary font-bold flex items-center gap-2 hover:translate-x-1 transition-transform">
-                Ver catálogo completo
-                <span class="material-symbols-outlined text-lg">arrow_forward</span>
-            </a>
+<section id="produtos" class="products-section">
+    <div class="site-container">
+        <div class="section-heading">
+            <p class="section-kicker">Nossas solucoes</p>
+            <h2>Cursos Paruana</h2>
+            <p>Conheca os programas em destaque para impulsionar a sua carreira.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="product-grid">
             @forelse($cursosDestaque as $curso)
-                <article class="bg-surface-container-lowest rounded-xl overflow-hidden group">
-                    <div class="relative h-48 overflow-hidden">
-                        <img alt="{{ $curso->titulo }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="{{ $curso->foto ? Storage::url($curso->foto) : asset('assets/img/paruana.png') }}">
-                        <div class="absolute top-4 left-4">
-                            <span class="bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">{{ $curso->categoria->nome ?? 'Curso' }}</span>
-                        </div>
+                <article class="product-card">
+                    <div class="product-media">
+                        <img src="{{ $curso->foto ? Storage::url($curso->foto) : asset('assets/img/logo.png') }}" alt="{{ $curso->titulo }}">
                     </div>
-                    <div class="p-8 space-y-6">
-                        <h3 class="text-xl font-bold text-primary group-hover:text-on-primary-fixed-variant transition-colors">{{ $curso->titulo }}</h3>
-                        <p class="text-sm text-on-surface-variant">{{ Illuminate\Support\Str::limit($curso->descricao, 100) }}</p>
-                        <div class="flex flex-wrap items-center gap-4 text-sm text-on-surface-variant">
-                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">schedule</span> {{ $curso->duracao_horas }}h</span>
-                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">groups</span> {{ $curso->matriculas_count }} aluno(s)</span>
-                            <span>{{ $curso->idioma ?? 'pt-AO' }}</span>
-                        </div>
-                        <div class="flex justify-between items-center gap-4 pt-2">
-                            <div class="text-2xl font-extrabold text-primary">{{ number_format($curso->preco, 2, ',', '.') }} Kz</div>
-                            <a href="{{ route('home.detalhe', $curso->id) }}" class="text-primary font-bold flex items-center gap-2 hover:translate-x-1 transition-transform whitespace-nowrap">
-                                Detalhes <span class="material-symbols-outlined text-lg">arrow_forward</span>
-                            </a>
-                        </div>
+                    <div class="product-body">
+                        <span>{{ $curso->categoria->nome ?? 'Curso' }}</span>
+                        <h3>{{ $curso->titulo }}</h3>
+                        <p>{{ Str::limit($curso->descricao ?? 'Curso completo com foco pratico e certificado.', 95) }}</p>
+                        <a href="{{ route('home.detalhe', $curso->id) }}">Saiba mais <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </article>
             @empty
-                <div class="md:col-span-3 bg-white rounded-xl p-10 text-center academic-monolith-shadow">
-                    <p class="text-on-surface-variant">Ainda não há cursos publicados. Publique cursos no painel admin para aparecerem aqui.</p>
-                </div>
+                <article class="product-card">
+                    <div class="product-media"><img src="{{ asset('assets/img/logo.png') }}" alt="Paruana"></div>
+                    <div class="product-body">
+                        <span>Em breve</span>
+                        <h3>Novos cursos</h3>
+                        <p>Estamos a preparar novas formacoes para o catalogo.</p>
+                        <a href="{{ route('home.catalogo') }}">Ver catalogo <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </article>
             @endforelse
         </div>
     </div>
 </section>
 
-<section id="formadores" class="py-28 bg-surface">
-    <div class="max-w-7xl mx-auto px-6 md:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-            <div class="space-y-6">
-                <span class="inline-block px-4 py-1 rounded-full bg-secondary-container text-on-secondary-fixed text-xs font-bold uppercase tracking-widest">Instrutores</span>
-                <h2 class="text-4xl md:text-5xl font-bold text-primary tracking-tight leading-tight">Aprenda com formadores ligados ao mercado</h2>
-                <p class="text-on-surface-variant text-lg">Cada curso publicado fica associado a um instrutor, permitindo ao aluno conhecer quem conduz a formação.</p>
-            </div>
+<section id="formadores" class="team-section">
+    <div class="site-container">
+        <div class="section-heading">
+            <h2>Nossa Equipa</h2>
+        </div>
 
-            <div class="space-y-4">
-                @forelse($formadores as $formador)
-                    <div class="bg-surface-container-lowest p-6 rounded-xl academic-monolith-shadow flex items-center gap-5">
-                        <div class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center font-black text-xl">
-                            {{ strtoupper(substr($formador->pessoa->primeironome ?? 'F', 0, 1)) }}
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-bold text-primary">{{ trim(($formador->pessoa->primeironome ?? '') . ' ' . ($formador->pessoa->segundonome ?? '')) ?: 'Formador' }}</h3>
-                            <p class="text-sm text-on-surface-variant">{{ $formador->especialidade ?: 'Formação profissional' }}</p>
-                        </div>
-                        <span class="text-sm font-bold text-primary">{{ $formador->cursos_count }} curso(s)</span>
+        <div class="team-grid">
+            @forelse($formadores as $formador)
+                <article class="team-card">
+                    <div class="team-top"></div>
+                    <div class="team-avatar">
+                        {{ strtoupper(substr($formador->pessoa?->primeironome ?? 'F', 0, 1)) }}
                     </div>
-                @empty
-                    <div class="bg-white rounded-xl p-10 text-center academic-monolith-shadow">
-                        <p class="text-on-surface-variant">Ainda não há formadores cadastrados.</p>
-                    </div>
-                @endforelse
-            </div>
+                    <h3>{{ trim(($formador->pessoa?->primeironome ?? 'Formador').' '.($formador->pessoa?->segundonome ?? '')) }}</h3>
+                    <p class="role">{{ $formador->especialidade ?? 'Formador' }}</p>
+                    <p>{{ $formador->cursos_count }} curso(s) publicado(s) na plataforma.</p>
+                </article>
+            @empty
+                <article class="team-card">
+                    <div class="team-top"></div>
+                    <div class="team-avatar">P</div>
+                    <h3>Equipa Paruana</h3>
+                    <p class="role">Formadores</p>
+                    <p>Profissionais preparados para acompanhar a sua aprendizagem.</p>
+                </article>
+            @endforelse
         </div>
     </div>
 </section>
 
-<section class="py-24 bg-primary">
-    <div class="max-w-5xl mx-auto px-6 md:px-8 text-center space-y-8">
-        <h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight">Comece pelo curso certo para o seu objectivo</h2>
-        <p class="text-slate-300 text-lg">Filtre por categoria, preço, duração e idioma no catálogo.</p>
-        <a href="{{ route('home.catalogo') }}" class="inline-flex bg-white text-primary px-10 py-4 rounded-md font-bold hover:bg-slate-100 transition-all">
-            Abrir catálogo
-        </a>
+<section id="blog" class="blog-section">
+    <div class="site-container">
+        <div class="section-heading">
+            <h2>Blog</h2>
+        </div>
+
+        <div class="blog-feature">
+            <div class="blog-image">
+                <img src="{{ asset('assets/img/paruana/promo-cursos.jpg') }}" alt="Cursos em promocao Paruana">
+            </div>
+            <div>
+                <span>{{ $blogPosts[0]['tag'] }} - {{ $blogPosts[0]['data'] }}</span>
+                <h3>{{ $blogPosts[0]['titulo'] }}</h3>
+                <p>{{ $blogPosts[0]['texto'] }}</p>
+                <a href="#">Ler mais <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <div class="blog-list">
+            @foreach(array_slice($blogPosts, 1) as $post)
+                <article class="blog-row">
+                    <img src="{{ $loop->first ? asset('assets/img/paruana/stand-formacao.jpg') : asset('assets/img/paruana/electricidade-pratica.jpg') }}" alt="{{ $post['titulo'] }}">
+                    <span>{{ $post['tag'] }} - {{ $post['data'] }}</span>
+                    <h3>{{ $post['titulo'] }}</h3>
+                    <p>{{ $post['texto'] }}</p>
+                    <a href="#">Visitar pagina <i class="bi bi-arrow-right"></i></a>
+                </article>
+            @endforeach
+        </div>
+    </div>
+</section>
+
+<section id="galeria" class="gallery-section">
+    <div class="site-container">
+        <div class="section-heading">
+            <h2>Galeria</h2>
+        </div>
+
+        <div class="gallery-slider" data-gallery>
+            <button type="button" class="gallery-btn gallery-prev" data-gallery-prev aria-label="Imagem anterior">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="gallery-stage">
+                <img src="{{ $paruanaImages[0]['src'] }}" alt="Galeria Paruana">
+                <div>
+                    <h3>{{ $paruanaImages[0]['title'] }}</h3>
+                    <p>{{ $paruanaImages[0]['copy'] }}</p>
+                </div>
+            </div>
+            <button type="button" class="gallery-btn gallery-next" data-gallery-next aria-label="Proxima imagem">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="gallery-thumbs">
+            @foreach($paruanaImages as $image)
+                <button type="button" class="gallery-thumb {{ $loop->first ? 'active' : '' }}" data-gallery-thumb="{{ $loop->index }}" data-title="{{ $image['title'] }}" data-copy="{{ $image['copy'] }}">
+                    <img src="{{ $image['src'] }}" alt="{{ $image['title'] }}">
+                </button>
+            @endforeach
+        </div>
     </div>
 </section>
 @endsection

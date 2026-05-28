@@ -15,8 +15,8 @@
     <div class="row g-4">
         @forelse($matriculas as $matricula)
             <div class="col-md-6 col-xl-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ $matricula->curso->foto ? Storage::url($matricula->curso->foto) : asset('assets/img/paruana.png') }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ $matricula->curso->titulo }}">
+                <div class="card student-course-card h-100 border-0 shadow-sm">
+                    <img src="{{ $matricula->curso->foto ? Storage::url($matricula->curso->foto) : asset('assets/img/paruana.png') }}" class="card-img-top" alt="{{ $matricula->curso->titulo }}">
                     <div class="card-body d-flex flex-column">
                         <span class="badge bg-primary align-self-start mb-3">{{ $matricula->curso->categoria->nome ?? 'Curso' }}</span>
                         <h5 class="card-title p-0 mb-2">{{ $matricula->curso->titulo }}</h5>
