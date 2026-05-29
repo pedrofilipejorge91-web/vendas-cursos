@@ -131,6 +131,38 @@
     button.innerHTML = button.dataset.originalText || button.innerHTML;
   }
 
+  function enhancePasswordToggles() {
+    document.querySelectorAll('input[type="password"], input[data-password-visible="true"]').forEach((field) => {
+      if (field.dataset.passwordToggleReady === 'true') return;
+      if (field.closest('.password-toggle-wrap')?.querySelector('.password-toggle')) return;
+      if (field.parentElement?.querySelector('.eye-toggle')) return;
+
+      field.dataset.passwordToggleReady = 'true';
+      field.classList.add('password-toggle-input');
+
+      const wrapper = field.parentElement;
+      if (wrapper && !wrapper.classList.contains('position-relative')) {
+        wrapper.classList.add('password-toggle-wrap');
+      }
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'password-toggle';
+      button.setAttribute('aria-label', 'Mostrar senha');
+      button.innerHTML = '<i class="bi bi-eye"></i>';
+
+      button.addEventListener('click', () => {
+        const visible = field.type === 'text';
+        field.type = visible ? 'password' : 'text';
+        field.dataset.passwordVisible = visible ? 'false' : 'true';
+        button.setAttribute('aria-label', visible ? 'Mostrar senha' : 'Ocultar senha');
+        button.innerHTML = visible ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+      });
+
+      field.insertAdjacentElement('afterend', button);
+    });
+  }
+
   async function submitAjax(form) {
     const submitter = form.querySelector('[type="submit"]');
     const formData = new FormData(form);
@@ -196,4 +228,12 @@
       submitAjax(form);
     }
   });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', enhancePasswordToggles);
+  } else {
+    enhancePasswordToggles();
+  }
+
+  document.addEventListener('shown.bs.modal', enhancePasswordToggles);
 })();

@@ -30,18 +30,6 @@
       </a>
     </li>
 
-<<<<<<< HEAD
-    <!-- CUPONS -->
-    <li class="nav-item">
-      <a class="nav-link collapsed" href="{{ route('admin.cupons.index') }}">
-        <i class="bi bi-ticket-perforated"></i>
-        <span>Gestao de Cupons</span>
-      </a>
-    </li>
-
-    <!-- CURSOS -->
-=======
->>>>>>> 02ed285 (Atualizacao do projeto)
     <li class="nav-item">
       <a class="nav-link {{ request()->routeIs('admin.administradores.*') ? '' : 'collapsed' }}" href="{{ route('admin.administradores.index') }}">
         <i class="bi bi-shield-lock"></i>

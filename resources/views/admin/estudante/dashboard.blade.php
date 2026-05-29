@@ -24,10 +24,10 @@
                 <h5 class="card-title">Cadastrar Estudante</h5>
 
                 <button type="button"
-                        class="btn btn-primary bi bi-plus me-1"
+                        class="btn btn-primary"
                         data-bs-toggle="modal"
                         data-bs-target="#basicModal">
-
+                    <i class="bi bi-plus me-1"></i>
                     Novo Estudante
                 </button>
 
@@ -39,117 +39,100 @@
 
                 <h5 class="card-title">Tabela de Estudantes</h5>
 
-                <table class="table datatable">
+                <div class="table-responsive">
+                    <table class="table datatable">
 
-                    <thead>
-                        <tr>
-                            <th>Usuário</th>
-                            <th>Nome Completo</th>
-                            <th>Contacto</th>
-                            <th>Email</th>
-                            <th>Escola</th>
-                            <th>Status</th>
-                            <th>Acções</th>
-                        </tr>
-                    </thead>
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>Nome Completo</th>
+                                <th>Contacto</th>
+                                <th>Email</th>
+                                <th>Escola</th>
+                                <th>Status</th>
+                                <th>Acções</th>
+                            </tr>
+                        </thead>
 
-                    <tbody>
+                        <tbody>
 
-                        @foreach($estudantes as $estudante)
+                            @foreach($estudantes as $estudante)
 
-                        <tr>
+                            <tr>
+                                <td>
+                                    {{ $estudante->pessoa->user->name ?? 'N/A' }}
+                                </td>
 
-                            {{-- USER --}}
-                            <td>
-                                {{ $estudante->pessoa->user->name ?? 'N/A' }}
-                            </td>
+                                <td>
+                                    {{ $estudante->pessoa->primeironome }}
+                                    {{ $estudante->pessoa->segundonome }}
+                                </td>
 
-                            {{-- NOME COMPLETO --}}
-                            <td>
-                                {{ $estudante->pessoa->primeironome }}
-                                {{ $estudante->pessoa->segundonome }}
-                            </td>
+                                <td>
+                                    {{ $estudante->pessoa->contacto }}
+                                </td>
 
-                            {{-- CONTACTO --}}
-                            <td>
-                                {{ $estudante->pessoa->contacto }}
-                            </td>
+                                <td>
+                                    {{ $estudante->pessoa->user->email ?? 'N/A' }}
+                                </td>
 
-                            {{-- EMAIL --}}
-                            <td>
-                                {{ $estudante->pessoa->user->email ?? 'N/A' }}
-                            </td>
+                                <td>
+                                    {{ $estudante->escola_actual ?? '-' }}
+                                </td>
 
-                            {{-- ESCOLA --}}
-                            <td>
-                                {{ $estudante->escola_actual ?? '-' }}
-                            </td>
+                                <td>
+                                    <span class="badge bg-{{ $estudante->status === 'ativo' ? 'success' : 'danger' }}">
+                                        {{ $estudante->status }}
+                                    </span>
+                                </td>
 
-                            {{-- STATUS --}}
-                            <td>
-                                <span class="badge bg-{{ $estudante->status === 'ativo' ? 'success' : 'danger' }}">
-                                    {{ $estudante->status }}
-                                </span>
-                            </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-info"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#edit-{{ $estudante->id }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
 
-                            {{-- AÇÕES --}}
-                            <td>
+                                        <button class="btn btn-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#details-{{ $estudante->id }}">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
 
-                                <div class="btn-group">
+                                        <button class="btn btn-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#delete-{{ $estudante->id }}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
 
-                                    {{-- EDITAR --}}
-                                    <button class="btn btn-info bi bi-pencil"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#edit-{{ $estudante->id }}">
-                                    </button>
-
-                                    {{-- DETALHES --}}
-                                    <button class="btn btn-primary bi bi-eye"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#details-{{ $estudante->id }}">
-                                    </button>
-
-                                    {{-- DELETE --}}
-                                    <button class="btn btn-danger bi bi-trash"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#delete-{{ $estudante->id }}">
-                                    </button>
-
-                                                                            {{-- TOGGLE STATUS --}}
-                                                                        <form method="POST"
-                                            action="{{ route('estudante.status', $estudante->id) }}">
-
+                                        <form method="POST"
+                                              action="{{ route('estudante.status', $estudante->id) }}">
                                             @csrf
                                             @method('PUT')
 
-                                            <button type="submit"
-                                                    class="btn btn-warning">
-
+                                            <button type="submit" class="btn btn-warning">
                                                 @if($estudante->status == 'ativo')
                                                     <i class="bi bi-toggle-on"></i>
                                                 @else
                                                     <i class="bi bi-toggle-off"></i>
                                                 @endif
-
                                             </button>
-
                                         </form>
+                                    </div>
+                                </td>
+                            </tr>
 
-                                </div>
+                            @include('admin.estudante.update')
+                            @include('admin.estudante.delete')
+                            @include('admin.estudante.show')
 
-                            </td>
+                            @endforeach
 
-                        </tr>
+                        </tbody>
 
-                        @include('admin.estudante.update')
-                        @include('admin.estudante.delete')
-                        @include('admin.estudante.show')
-
-                        @endforeach
-
-                    </tbody>
-
-                </table>
+                    </table>
+                </div>
 
             </div>
         </div>

@@ -28,29 +28,12 @@
         min-height: calc(100vh - 140px);
     }
 
-<<<<<<< HEAD
     .course-topbar {
         background: #111827;
         color: #fff;
         border-radius: 8px;
         padding: 22px;
     }
-=======
-<section class="section lesson-shell">
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    @if($aulaAtual)
-                        <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
-                            <div>
-                                <span class="badge bg-primary mb-2">{{ ucfirst($aulaAtual->tipo) }}</span>
-                                <h4 class="fw-bold">{{ $aulaAtual->titulo }}</h4>
-                                <p class="text-muted mb-0">{{ $aulaAtual->descricao }}</p>
-                            </div>
-                            <span class="text-muted small">{{ $aulaAtual->duracao_minutos }} min</span>
-                        </div>
->>>>>>> 02ed285 (Atualizacao do projeto)
 
     .course-topbar .breadcrumb a,
     .course-topbar .breadcrumb-item,

@@ -76,9 +76,9 @@
         </div>
 
         <div class="mb-3">
-            <label for="capa" class="form-label">Capa do Curso (Opcional)</label>
-            <input type="file" name="capa" id="capa" class="form-control @error('capa') is-invalid @enderror" accept="image/*">
-            @error('capa')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <label for="foto" class="form-label">Capa do Curso (Opcional)</label>
+            <input type="file" name="foto" id="foto" class="form-control @error('foto') is-invalid @enderror" accept="image/*">
+            @error('foto')<div class="invalid-feedback">{{ $message }}</div>@enderror
             @if($curso->foto)
                 <div class="mt-2">
                     <img src="{{ asset('storage/' . $curso->foto) }}" alt="Capa" style="max-width:200px;" />

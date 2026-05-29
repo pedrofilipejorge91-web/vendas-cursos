@@ -146,7 +146,7 @@
                                 <div class="col-md-8">
                                     <label class="form-label fw-bold small">Alterar Foto de Capa (Opcional)</label>
                                     <div class="input-group">
-                                        <input type="file" class="form-control border-0 bg-light" name="capa" accept="image/*">
+                                        <input type="file" class="form-control border-0 bg-light" name="foto" accept="image/*">
                                         <span class="input-group-text bg-warning text-white border-0"><i class="bi bi-upload"></i></span>
                                     </div>
                                     <div class="form-text mt-1 small">Deixe em branco para manter a imagem atual.</div>

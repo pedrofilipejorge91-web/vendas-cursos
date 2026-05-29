@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('pedidos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('cupom_id')->nullable()->constrained('cupons')->nullOnDelete();
             $table->string('referencia')->unique();
             $table->decimal('subtotal', 12, 2)->default(0);
             $table->decimal('desconto', 12, 2)->default(0);

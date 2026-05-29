@@ -79,7 +79,7 @@ class CursoController extends Controller
         $curso = Curso::findOrFail($id);
         $this->autorizarGestao($curso);
 
-        $request->validate([
+        $dados = $request->validate([
             'titulo' => 'required|string|max:255',
             'descricao' => 'required|string',
             'preco' => 'required|numeric|min:0',
@@ -90,8 +90,6 @@ class CursoController extends Controller
             'status' => 'nullable|in:rascunho,publicado,inativo',
             'foto' => 'nullable|image|max:2048',
         ]);
-
-        $dados = $request->all();
 
         if (auth()->user()?->tipo === 'formador') {
             $dados['formador_id'] = $this->formadorIdAutenticado();

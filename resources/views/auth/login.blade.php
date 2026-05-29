@@ -6,21 +6,22 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Entrar</title>
 
-    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
     <style>
         body {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(0,0,0,0.02)), url('/assets/img/logo.png') center/cover no-repeat;
+            background: #f3f4f6;
             position: relative;
         }
         .blur-bg {
             position: absolute;
             inset: 0;
             backdrop-filter: blur(8px) saturate(120%);
-            background: rgba(255,255,255,0.03);
+            background: rgba(229,231,235,0.72);
             z-index: 0;
         }
         .login-card {
@@ -30,7 +31,7 @@
             max-width: calc(100% - 32px);
             padding: 32px;
             border-radius: 12px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.96));
+            background: linear-gradient(180deg, rgba(248,249,251,0.98), rgba(243,244,246,0.96));
             box-shadow: 0 10px 30px rgba(0,0,0,0.12);
         }
         .logo-img { max-width: 140px; }
@@ -89,8 +90,7 @@
         </form>
     </div>
 
-    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/vendor/bootstrap-icons/bootstrap-icons.js"></script>
+    <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script>
         function togglePassword(){
             const pw = document.getElementById('password');

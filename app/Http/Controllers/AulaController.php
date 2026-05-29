@@ -137,6 +137,10 @@ class AulaController extends Controller
     public function show(Aula $aula)
     {
         $aula->load('curso');
+
+        $this->autorizarGestao($aula->curso);
+
+        return view('admin.aulas.show', compact('aula'));
     }
 
     private function autorizarGestao(Curso $curso): void

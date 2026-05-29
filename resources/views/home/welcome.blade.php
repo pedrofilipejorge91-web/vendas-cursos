@@ -59,8 +59,9 @@
         <h1>Formação profissional para transformar a sua carreira.</h1>
         <p class="hero-copy">Cursos praticos, formadores experientes, acompanhamento e certificado para alunos e empresas em Angola.</p>
         <div class="hero-actions">
-            <a href="{{ route('home.catalogo') }}" class="btn-hero-primary">Comece seu curso agora</a>
-            <a href="#servicos" class="btn-hero-secondary">Ver servicos</a>
+            <a href="{{ route('register') }}" class="btn-hero-primary">Inscrever-se</a>
+            <a href="{{ route('login') }}" class="btn-hero-secondary">Login</a>
+            <a href="{{ route('home.catalogo') }}" class="btn-hero-secondary">Ver cursos</a>
         </div>
     </div>
 </section>
@@ -163,6 +164,7 @@
                 <article class="team-card">
                     <div class="team-top"></div>
                     <div class="team-avatar">
+                    <img src="{{ Storage::url($formador->foto_perfil) }} ">
                         {{ strtoupper(substr($formador->pessoa?->primeironome ?? 'F', 0, 1)) }}
                     </div>
                     <h3>{{ trim(($formador->pessoa?->primeironome ?? 'Formador').' '.($formador->pessoa?->segundonome ?? '')) }}</h3>

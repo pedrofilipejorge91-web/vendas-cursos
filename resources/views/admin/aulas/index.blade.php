@@ -104,10 +104,11 @@
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center gap-2">
                                                 <!-- Detalhes -->
-                                                <button type="button" class="btn btn-light btn-sm text-primary shadow-sm border" 
-                                                        data-bs-toggle="modal" data-bs-target="#details-{{$aula->id}}" title="Ver Detalhes">
+                                                <a href="{{ Auth::user()?->tipo === 'formador' ? route('formador.aulas.show', $aula) : route('aulas.show', $aula) }}"
+                                                   class="btn btn-light btn-sm text-primary shadow-sm border"
+                                                   title="Ver Detalhes">
                                                     <i class="bi bi-eye"></i>
-                                                </button>
+                                                </a>
 
                                                 <!-- Editar -->
                                                 <button type="button" class="btn btn-light btn-sm text-warning shadow-sm border" 
@@ -127,7 +128,6 @@
                                     <!-- Modais Organizados -->
                                     @include('admin.aulas.edit')
                                     @include('admin.aulas.delete')
-                                    @include('admin.aulas.detalhes')
 
                                 @empty
                                     <tr>

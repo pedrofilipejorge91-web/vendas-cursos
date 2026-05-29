@@ -15,6 +15,39 @@
   --radius: 8px;
 }
 
+.password-toggle-wrap {
+  position: relative;
+}
+
+.password-toggle-input {
+  padding-right: 44px !important;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  z-index: 5;
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #667085;
+  transform: translateY(-50%);
+}
+
+.password-toggle:hover,
+.password-toggle:focus {
+  color: #012970;
+  background: #edf0f4;
+  outline: none;
+}
+
 * {
   box-sizing: border-box;
 }

@@ -11,7 +11,6 @@ class Pedido extends Model
 
     protected $fillable = [
         'user_id',
-        'cupom_id',
         'referencia',
         'subtotal',
         'desconto',

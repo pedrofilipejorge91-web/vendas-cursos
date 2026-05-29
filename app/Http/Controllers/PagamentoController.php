@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cupom;
 use App\Models\Matricula;
 use App\Models\Pagamento;
 use App\Models\Pedido;
@@ -25,40 +24,10 @@ class PagamentoController extends Controller
                 ->withErrors(['carrinho' => 'Adicione pelo menos um curso antes de finalizar a compra.']);
         }
 
-        [$subtotal, $cupom, $desconto, $total] = $this->calcularTotais($carrinho);
+        [$subtotal, $desconto, $total] = $this->calcularTotais($carrinho);
         $metodos = app(PagamentoGatewayService::class)->metodosDisponiveis();
 
-        return view('home.pagamento', compact('carrinho', 'subtotal', 'desconto', 'total', 'cupom', 'metodos'));
-    }
-
-    public function aplicarCupom(Request $request)
-    {
-        $request->validate([
-            'codigo' => 'required|string|max:50',
-        ]);
-
-        $cupom = Cupom::where('codigo', strtoupper(trim($request->codigo)))->first();
-
-        if (! $cupom || ! $cupom->estaDisponivel()) {
-            return back()->withErrors(['cupom' => 'Cupom invalido, expirado ou indisponivel.']);
-        }
-
-        $subtotal = $this->calcularTotal(session()->get('carrinho', []));
-
-        if ($cupom->calcularDesconto($subtotal) <= 0) {
-            return back()->withErrors(['cupom' => 'Este cupom nao gera desconto para a compra atual.']);
-        }
-
-        session(['cupom_id' => $cupom->id]);
-
-        return back()->with('success', 'Cupom aplicado com sucesso.');
-    }
-
-    public function removerCupom()
-    {
-        session()->forget('cupom_id');
-
-        return back()->with('success', 'Cupom removido.');
+        return view('home.pagamento', compact('carrinho', 'subtotal', 'desconto', 'total', 'metodos'));
     }
 
     public function processar(Request $request)
@@ -82,11 +51,10 @@ class PagamentoController extends Controller
             : null;
 
         $pedido = DB::transaction(function () use ($request, $carrinho, $comprovativoPath) {
-            [$subtotal, $cupom, $desconto, $total] = $this->calcularTotais($carrinho);
+            [$subtotal, $desconto, $total] = $this->calcularTotais($carrinho);
 
             $pedido = Pedido::create([
                 'user_id' => Auth::id(),
-                'cupom_id' => $cupom?->id,
                 'referencia' => $this->gerarReferencia('PED'),
                 'subtotal' => $subtotal,
                 'desconto' => $desconto,
@@ -114,14 +82,10 @@ class PagamentoController extends Controller
                 'confirmado_em' => null,
             ]);
 
-            if ($cupom) {
-                $cupom->increment('usos');
-            }
-
             return $pedido->load('itens', 'pagamento');
         });
 
-        session()->forget(['carrinho', 'cupom_id']);
+        session()->forget('carrinho');
 
         app(NotificacaoService::class)->enviar(
             Auth::user(),
@@ -189,17 +153,10 @@ class PagamentoController extends Controller
     private function calcularTotais(array $carrinho): array
     {
         $subtotal = $this->calcularTotal($carrinho);
-        $cupom = session('cupom_id') ? Cupom::find(session('cupom_id')) : null;
-        $desconto = $cupom?->calcularDesconto($subtotal) ?? 0;
+        $desconto = 0;
+        $total = $subtotal;
 
-        if ($cupom && $desconto <= 0) {
-            session()->forget('cupom_id');
-            $cupom = null;
-        }
-
-        $total = max($subtotal - $desconto, 0);
-
-        return [$subtotal, $cupom, $desconto, $total];
+        return [$subtotal, $desconto, $total];
     }
 
     private function gerarReferencia(string $prefixo): string
