@@ -33,12 +33,13 @@
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
           <li class="dropdown-header">
             Notificações recentes
+            <a href="{{ route('admin.notificacoes') }}"><span class="badge rounded-pill bg-primary p-2 ms-2">Ver todas</span></a>
           </li>
           <li><hr class="dropdown-divider"></li>
 
           @forelse(auth()->user()->notificacoes()->latest()->take(5)->get() as $notificacao)
             <li class="notification-item">
-              <i class="bi bi-info-circle text-primary"></i>
+              <i class="bi {{ $notificacao->lida_em ? 'bi-check-circle text-success' : 'bi-info-circle text-primary' }}"></i>
               <div>
                 <h4>{{ $notificacao->titulo }}</h4>
                 <p>{{ Str::limit($notificacao->mensagem, 70) }}</p>
@@ -55,6 +56,8 @@
               </div>
             </li>
           @endforelse
+          <li><hr class="dropdown-divider"></li>
+          <li class="dropdown-footer"><a href="{{ route('admin.notificacoes') }}">Abrir centro de notificações</a></li>
         </ul>
       </li>
 

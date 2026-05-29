@@ -1,91 +1,360 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-AO">
 <head>
     <meta charset="UTF-8">
     <title>Certificado - {{ $matricula->user->name }}</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Georgia, serif; background: #fff; padding: 20px; }
-        .certificate { width: 100%; max-width: 800px; margin: 0 auto; padding: 60px; border: 3px solid #1a472a; background: #f5f5f0; position: relative; }
-        .certificate::before { content: ''; position: absolute; inset: 20px; border: 1px solid #1a472a; }
-        .content { position: relative; z-index: 1; text-align: center; }
-        .institution-name { font-size: 24px; font-weight: bold; color: #1a472a; margin-bottom: 5px; }
-        .subtitle { font-size: 12px; color: #666; margin-bottom: 10px; }
-        .badge { display: inline-block; background: #1a472a; color: white; padding: 8px 16px; border-radius: 20px; font-size: 11px; font-weight: bold; letter-spacing: 1px; margin-top: 10px; }
-        .divider { height: 2px; background: #1a472a; margin: 30px 0; }
-        .text-centered p { font-size: 14px; color: #333; margin: 8px 0; }
-        .recipient-name { font-size: 28px; font-weight: bold; color: #1a472a; margin: 15px 0; text-transform: uppercase; }
-        .course-title { font-size: 20px; font-weight: bold; color: #1a472a; margin: 15px 0; font-style: italic; }
-        .footer-info { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; font-size: 12px; }
-        .code-section { border: 1px solid #1a472a; padding: 12px; background: white; }
-        .code-label { font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 4px; }
-        .code { font-family: "Courier New", monospace; font-weight: bold; font-size: 14px; color: #1a472a; }
-        .qr-section { text-align: center; margin-top: 20px; }
-        .qr-code { display: inline-block; padding: 10px; background: white; border: 1px solid #ddd; }
-        .verification-url { font-size: 10px; color: #666; margin-top: 10px; word-break: break-all; }
-        .signature-section { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 50px; font-size: 12px; }
-        .signature-line { border-top: 1px solid #333; padding-top: 10px; text-align: center; }
-        .issue-date { font-size: 12px; color: #666; margin-top: 20px; }
+        @page { margin: 18mm; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            color: #141414;
+            font-family: "Times New Roman", Times, serif;
+            background: #fff;
+        }
+        .page {
+            position: relative;
+            width: 100%;
+            min-height: 100%;
+            padding: 22px 34px 28px;
+            border: 7px double #111;
+            background: #fffdf6;
+            page-break-after: always;
+        }
+        .page:last-child { page-break-after: auto; }
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 380px;
+            opacity: 0.06;
+            transform: translate(-50%, -50%);
+        }
+        .inner-border {
+            position: absolute;
+            inset: 14px;
+            border: 1px solid #b59b42;
+        }
+        .content {
+            position: relative;
+            z-index: 2;
+        }
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .header-table td {
+            vertical-align: middle;
+        }
+        .logo {
+            width: 118px;
+        }
+        .brand {
+            text-align: center;
+        }
+        .brand h1 {
+            margin: 0;
+            color: #0033b7;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 34px;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+        .brand .commercial {
+            color: #d11616;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .brand p {
+            margin: 4px 0 0;
+            font-size: 12px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+        .certificate-title {
+            margin: 18px 0 22px;
+            color: #111;
+            font-size: 40px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-align: center;
+            text-decoration: underline;
+            text-transform: uppercase;
+        }
+        .certificate-text {
+            width: 88%;
+            margin: 0 auto;
+            font-size: 19px;
+            line-height: 1.75;
+            text-align: justify;
+        }
+        .certificate-text .student,
+        .certificate-text .course {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .date-line {
+            width: 88%;
+            margin: 18px auto 0;
+            font-size: 18px;
+            text-align: left;
+        }
+        .signature-area {
+            width: 100%;
+            margin-top: 22px;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .signature-area td {
+            width: 33.333%;
+            vertical-align: bottom;
+            text-align: center;
+        }
+        .signature-line {
+            display: inline-block;
+            min-width: 210px;
+            padding-top: 8px;
+            border-top: 1px solid #111;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .signature-name {
+            display: block;
+            margin-top: 4px;
+            font-size: 13px;
+            font-weight: normal;
+            text-transform: none;
+        }
+        .qr-box {
+            display: inline-block;
+            padding: 6px;
+            border: 1px solid #111;
+            background: #fff;
+        }
+        .qr-box svg {
+            width: 82px;
+            height: 82px;
+        }
+        .meta-row {
+            width: 88%;
+            margin: 18px auto 0;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .meta-row td {
+            width: 50%;
+            padding: 7px 10px;
+            border: 1px solid #111;
+        }
+        .meta-label {
+            display: block;
+            color: #555;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        .meta-value {
+            font-family: "Courier New", monospace;
+            font-weight: bold;
+        }
+        .program-page {
+            background: #fff;
+        }
+        .program-title {
+            margin: 14px 0 22px;
+            color: #111;
+            font-size: 34px;
+            letter-spacing: 3px;
+            text-align: center;
+            text-decoration: underline;
+            text-transform: uppercase;
+        }
+        .program-subtitle {
+            margin: 0 0 14px;
+            font-size: 16px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .program-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .program-table th,
+        .program-table td {
+            padding: 9px 10px;
+            border: 1px solid #111;
+        }
+        .program-table th {
+            background: #f0f0f0;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .program-table td:not(:first-child) {
+            text-align: center;
+            white-space: nowrap;
+        }
+        .program-total {
+            margin-top: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: right;
+            text-transform: uppercase;
+        }
+        .verification {
+            margin-top: 8px;
+            color: #555;
+            font-size: 9px;
+            text-align: center;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
-    <div class="certificate">
-        <div class="content">
-            <div class="header">
-                <div class="institution-name">{{ $centro['nome'] ?? 'Centro de Formação Paruana Comercial' }}</div>
-                <div class="subtitle">Plataforma de Educacao e Certificacao</div>
-                <div class="subtitle">
-                    {{ $centro['endereco'] ?? 'Angola' }}
-                    @if(!empty($centro['nif'])) | NIF: {{ $centro['nif'] }} @endif
-                    @if(!empty($centro['contacto'])) | Contacto: {{ $centro['contacto'] }} @endif
-                </div>
-                <div class="badge">CERTIFICADO DIGITAL</div>
-            </div>
+@php
+    $meses = [
+        1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março', 4 => 'Abril',
+        5 => 'Maio', 6 => 'Junho', 7 => 'Julho', 8 => 'Agosto',
+        9 => 'Setembro', 10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro',
+    ];
+    $emitidoEm = $certificado->emitido_em ?? now();
+    $dataExtenso = 'Luanda, aos '.$emitidoEm->format('d').' de '.$meses[(int) $emitidoEm->format('n')].' de '.$emitidoEm->format('Y').'.';
+    $inicioCurso = $matricula->created_at?->format('d/m/Y') ?? $emitidoEm->format('d/m/Y');
+    $fimCurso = $matricula->concluido_em?->format('d/m/Y') ?? $emitidoEm->format('d/m/Y');
+    $nota = $solicitacao?->nota_curso !== null ? number_format((float) $solicitacao->nota_curso, 0, ',', '.') : '__';
+    $duracao = (int) ($matricula->curso->duracao_horas ?? 0);
+    $aulas = $matricula->curso->aulas->sortBy('numero_aula');
+    $logoPath = public_path('assets/img/logo.png');
+    $logoData = file_exists($logoPath) ? 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath)) : null;
+@endphp
 
-            <div class="divider"></div>
+<section class="page">
+    <div class="inner-border"></div>
+    @if($logoData)
+        <img class="watermark" src="{{ $logoData }}" alt="">
+    @endif
 
-            <div class="text-centered">
-                <p>Certificamos que</p>
-                <div class="recipient-name">{{ $matricula->user->name }}</div>
-                <p>concluiu com sucesso o curso</p>
-                <div class="course-title">{{ $matricula->curso->titulo }}</div>
-                <p>completando {{ $matricula->curso->duracao_horas }} horas de aprendizado e atividades praticas.</p>
-            </div>
+    <div class="content">
+        <table class="header-table">
+            <tr>
+                <td style="width: 145px;">
+                    @if($logoData)
+                        <img class="logo" src="{{ $logoData }}" alt="Paruana Comercial">
+                    @endif
+                </td>
+                <td class="brand">
+                    <h1>Paruana</h1>
+                    <div class="commercial">Comercial</div>
+                    <p>{{ $centro['nome'] ?? 'Centro de Formação Profissional Paruana' }}</p>
+                    <p>{{ $centro['endereco'] ?? 'Angola' }}@if(!empty($centro['nif'])) | NIF: {{ $centro['nif'] }} @endif @if(!empty($centro['contacto'])) | Contacto: {{ $centro['contacto'] }} @endif</p>
+                </td>
+                <td style="width: 145px;"></td>
+            </tr>
+        </table>
 
-            <div class="divider"></div>
+        <div class="certificate-title">Certificado</div>
 
-            <div class="footer-info">
-                <div class="code-section">
-                    <div class="code-label">Codigo do Certificado</div>
-                    <div class="code">{{ $certificado->codigo }}</div>
-                </div>
-                <div class="code-section">
-                    <div class="code-label">Data de Emissao</div>
-                    <div class="code">{{ $certificado->emitido_em?->format('d/m/Y') ?? now()->format('d/m/Y') }}</div>
-                </div>
-            </div>
-
-            <div class="qr-section">
-                <p style="font-size: 12px; margin-bottom: 10px; color: #666;">Escaneie o codigo QR para verificar a autenticidade:</p>
-                <div class="qr-code">{!! $qrCode !!}</div>
-                <div class="verification-url">Verificar em: {{ $verificationUrl }}</div>
-            </div>
-
-            <div class="signature-section">
-                <div class="signature-line">
-                    <p style="font-weight: bold;">Diretor Geral</p>
-                    <p style="font-size: 10px;">{{ $centro['nome'] ?? 'Centro de Formação Paruana Comercial' }}</p>
-                </div>
-                <div class="signature-line">
-                    <p style="font-weight: bold;">{{ $matricula->curso->formador->pessoa->primeironome ?? 'Formador' }}</p>
-                    <p style="font-size: 10px;">Instrutor do Curso</p>
-                </div>
-            </div>
-
-            <div class="issue-date">
-                Emitido em: {{ $certificado->emitido_em?->format('d/m/Y') ?? now()->format('d/m/Y') }}
-            </div>
+        <div class="certificate-text">
+            O centro de formação profissional <strong>PARUANA</strong> certifica que
+            <span class="student">{{ $matricula->user->name }}</span>, concluiu com aproveitamento o curso de
+            <span class="course">{{ $matricula->curso->titulo }}</span>, monitorizado por este centro de formação profissional
+            que decorreu no período de {{ $inicioCurso }} à {{ $fimCurso }} com a duração de {{ $duracao }} horas,
+            tendo obtido uma classificação final de {{ $nota }} valores, numa escala de 0 à 20.
+            <br>
+            Por ser verdade e assim constar, passou-se o presente Certificado, que vai assinado e autenticado por esta instituição.
         </div>
+
+        <div class="date-line">{{ $dataExtenso }}</div>
+
+        <table class="meta-row">
+            <tr>
+                <td>
+                    <span class="meta-label">Código do certificado</span>
+                    <span class="meta-value">{{ $certificado->codigo }}</span>
+                </td>
+                <td>
+                    <span class="meta-label">Data de emissão</span>
+                    <span class="meta-value">{{ $emitidoEm->format('d/m/Y') }}</span>
+                </td>
+            </tr>
+        </table>
+
+        <table class="signature-area">
+            <tr>
+                <td>
+                    <span class="signature-line">O Director do Centro</span>
+                    <span class="signature-name">Paulo António João</span>
+                </td>
+                <td>
+                    <div class="qr-box">{!! $qrCode !!}</div>
+                    <div class="verification">Verificação: {{ $verificationUrl }}</div>
+                </td>
+                <td>
+                    <span class="signature-line">O Formador</span>
+                    <span class="signature-name">{{ trim(($matricula->curso->formador->pessoa->primeironome ?? '').' '.($matricula->curso->formador->pessoa->segundonome ?? '')) ?: 'Formador' }}</span>
+                </td>
+            </tr>
+        </table>
     </div>
+</section>
+
+<section class="page program-page">
+    <div class="inner-border"></div>
+    <div class="content">
+        <table class="header-table">
+            <tr>
+                <td style="width: 120px;">
+                    @if($logoData)
+                        <img class="logo" src="{{ $logoData }}" alt="Paruana Comercial">
+                    @endif
+                </td>
+                <td class="brand">
+                    <h1>Paruana</h1>
+                    <div class="commercial">Comercial</div>
+                    <p>{{ $centro['nome'] ?? 'Centro de Formação Profissional Paruana' }}</p>
+                </td>
+                <td style="width: 120px;"></td>
+            </tr>
+        </table>
+
+        <div class="program-title">Carga Horária</div>
+        <p class="program-subtitle">Curso de {{ $matricula->curso->titulo }}</p>
+
+        <table class="program-table">
+            <thead>
+                <tr>
+                    <th style="width: 55%;">Conteúdo programático</th>
+                    <th style="width: 15%;">Teoria</th>
+                    <th style="width: 15%;">Prática</th>
+                    <th style="width: 15%;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($aulas as $aula)
+                    @php
+                        $horasAula = max(1, (int) ceil(((int) $aula->duracao_minutos) / 60));
+                    @endphp
+                    <tr>
+                        <td>{{ $aula->titulo }}</td>
+                        <td>-</td>
+                        <td>{{ $horasAula }} hora{{ $horasAula === 1 ? '' : 's' }}</td>
+                        <td>{{ $horasAula }} hora{{ $horasAula === 1 ? '' : 's' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td>Módulo: {{ $matricula->curso->titulo }}</td>
+                        <td>-</td>
+                        <td>{{ $duracao }} horas</td>
+                        <td>{{ $duracao }} horas</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <div class="program-total">Total: {{ $duracao }} horas</div>
+    </div>
+</section>
 </body>
 </html>

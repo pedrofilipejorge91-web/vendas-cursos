@@ -17,27 +17,27 @@
   <nav class="header-nav ms-auto">
     <ul class="d-flex align-items-center">
       <li class="nav-item d-block d-lg-none">
-        <a class="nav-link nav-icon search-bar-toggle" href="#" aria-label="Pesquisar">
+        <button class="nav-link nav-icon search-bar-toggle border-0 bg-transparent" type="button" aria-label="Pesquisar">
           <i class="bi bi-search"></i>
-        </a>
+        </button>
       </li>
 
       <li class="nav-item dropdown">
-        <a class="nav-link nav-icon student-icon-btn" href="#" data-bs-toggle="dropdown" aria-label="Notificações">
+        <button class="nav-link nav-icon student-icon-btn border-0" type="button" data-bs-toggle="dropdown" aria-label="Notificações">
           <i class="bi bi-bell"></i>
           <span class="badge bg-primary badge-number">{{ auth()->user()->notificacoes()->whereNull('lida_em')->count() }}</span>
-        </a>
+        </button>
 
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
           <li class="dropdown-header">
             Notificações recentes
-            <a href="#"><span class="badge rounded-pill bg-primary p-2 ms-2">Ver</span></a>
+            <a href="{{ route('estudante.notificacoes') }}"><span class="badge rounded-pill bg-primary p-2 ms-2">Ver</span></a>
           </li>
           <li><hr class="dropdown-divider"></li>
 
           @forelse(auth()->user()->notificacoes()->latest()->take(4)->get() as $notificacao)
             <li class="notification-item">
-              <i class="bi bi-info-circle text-primary"></i>
+              <i class="bi {{ $notificacao->lida_em ? 'bi-check-circle text-success' : 'bi-info-circle text-primary' }}"></i>
               <div>
                 <h4>{{ $notificacao->titulo }}</h4>
                 <p>{{ Str::limit($notificacao->mensagem, 60) }}</p>
@@ -56,15 +56,15 @@
           @endforelse
 
           <li><hr class="dropdown-divider"></li>
-          <li class="dropdown-footer"><a href="#">Ver todas notificações</a></li>
+          <li class="dropdown-footer"><a href="{{ route('estudante.notificacoes') }}">Ver todas notificações</a></li>
         </ul>
       </li>
 
       <li class="nav-item dropdown">
-        <a class="nav-link nav-icon student-icon-btn" href="#" data-bs-toggle="dropdown" aria-label="Carrinho">
+        <button class="nav-link nav-icon student-icon-btn border-0" type="button" data-bs-toggle="dropdown" aria-label="Carrinho">
           <i class="bi bi-cart3"></i>
           <span class="badge bg-success badge-number">{{ $cartCount ?? 0 }}</span>
-        </a>
+        </button>
 
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
           <li class="dropdown-header">
@@ -88,10 +88,10 @@
       </li>
 
       <li class="nav-item dropdown pe-3">
-        <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+        <button class="nav-link nav-profile d-flex align-items-center pe-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown" aria-label="Menu do aluno">
           <span class="student-avatar">{{ strtoupper(Str::substr(Auth::user()->name, 0, 1)) }}</span>
           <span class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->name }}</span>
-        </a>
+        </button>
 
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
           <li class="dropdown-header">

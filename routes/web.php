@@ -12,6 +12,7 @@ use App\Http\Controllers\CursoAcessoController;
 use App\Http\controllers\CursoController;
 use App\Http\controllers\EstudanteController;
 use App\Http\Controllers\FormadorController;
+use App\Http\Controllers\FormadorAreaController;
 use App\Http\controllers\FormadorDashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\controllers\InscricaoController;
@@ -55,6 +56,8 @@ Route::middleware(['auth', 'tipo:admin'])->group(function () {
     Route::post('/admin/certificados/solicitacoes/{solicitacao}/decidir', [\App\Http\Controllers\CertificadoSolicitacaoController::class, 'decidirAdmin'])->name('admin.certificados.decidir');
 
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'admin'])->name('admin.dashboard');
+    Route::get('/admin/notificacoes', [NotificacaoController::class, 'index'])->name('admin.notificacoes');
+    Route::post('/admin/notificacoes/lidas', [NotificacaoController::class, 'marcarLidas'])->name('admin.notificacoes.lidas');
     Route::get('/admin/relatorios', [RelatorioController::class, 'admin'])->name('admin.relatorios');
     Route::get('/admin/administradores', [AdminUserController::class, 'index'])->name('admin.administradores.index');
     Route::post('/admin/administradores', [AdminUserController::class, 'store'])->name('admin.administradores.store');
@@ -98,12 +101,15 @@ Route::match(['post','get','put','delete'],'/admin/Categoria/update/{id}',[Categ
 // FORMADOR
 Route::middleware(['auth', 'tipo:formador'])->group(function () {
 
-
-
-    Route::get('/formador/dashboard', function () {
-        return view('formador.dashboard');
-    })->name('formador.dashboard');
     Route::get('/formador/dashboard', [FormadorDashboardController::class, 'index'])->name('formador.dashboard');
+    Route::get('/formador/pesquisa', [FormadorAreaController::class, 'pesquisar'])->name('formador.pesquisa');
+    Route::get('/formador/perfil', [FormadorAreaController::class, 'perfil'])->name('formador.perfil');
+    Route::put('/formador/perfil', [FormadorAreaController::class, 'actualizarPerfil'])->name('formador.perfil.update');
+    Route::get('/formador/comentarios', [FormadorAreaController::class, 'comentarios'])->name('formador.comentarios');
+    Route::get('/formador/notificacoes', [FormadorAreaController::class, 'notificacoes'])->name('formador.notificacoes');
+    Route::post('/formador/notificacoes/lidas', [FormadorAreaController::class, 'marcarNotificacoesLidas'])->name('formador.notificacoes.lidas');
+    Route::get('/formador/suporte', [FormadorAreaController::class, 'suporte'])->name('formador.suporte');
+    Route::post('/formador/suporte', [FormadorAreaController::class, 'enviarSuporte'])->name('formador.suporte.enviar');
     Route::get('/formador/relatorios', [RelatorioController::class, 'formador'])->name('formador.relatorios');
     Route::get('/formador/cursos', [CursoController::class, 'index'])->name('formador.cursos');
     Route::post('/formador/cursos', [CursoController::class, 'store'])->name('formador.cursos.store');
@@ -129,6 +135,8 @@ Route::middleware(['auth', 'tipo:formador'])->group(function () {
 /////////////////////////////////////////////////////////////////////////////////////////////
 Route::middleware(['auth', 'tipo:estudante'])->group(function () {
 Route::get('/estudante/dashboard', [CursoAcessoController::class, 'dashboard'])->name('dashboard');
+    Route::get('/estudante/notificacoes', [NotificacaoController::class, 'index'])->name('estudante.notificacoes');
+    Route::post('/estudante/notificacoes/lidas', [NotificacaoController::class, 'marcarLidas'])->name('estudante.notificacoes.lidas');
 
     // Certificados / questionário
     Route::get('/meus-cursos/{matricula}/certificado/questionario', [\App\Http\Controllers\CertificadoSolicitacaoController::class, 'mostrarQuestionarioAluno'])->name('estudante.certificados.questionario');
@@ -151,6 +159,7 @@ Route::get('/certificados/verificar/{codigo}', [CursoAcessoController::class, 'v
 
 // Rotas de Carrinho e Pagamento (Acessíveis a usuários logados)
 Route::middleware('auth')->group(function () {
+Route::delete('/notificacoes/{notificacao}', [NotificacaoController::class, 'destroy'])->name('notificacoes.destroy');
 Route::get('/home/carrinho', [CarrinhoController::class, 'index'])->name('home.carrinho');
 Route::post('/carrinho/remove', [CarrinhoController::class, 'remove'])->name('carrinho.remove');
 Route::post('/carrinho/add', [CarrinhoController::class, 'add'])->name('carrinho.add');

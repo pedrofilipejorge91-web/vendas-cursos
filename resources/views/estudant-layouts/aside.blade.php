@@ -31,6 +31,13 @@
       </a>
     </li>
 
+    <li class="nav-item">
+      <a class="nav-link {{ request()->routeIs('estudante.notificacoes') ? '' : 'collapsed' }}" href="{{ route('estudante.notificacoes') }}">
+        <i class="bi bi-bell"></i>
+        <span>Notificações</span>
+      </a>
+    </li>
+
     <li class="nav-heading">Explorar</li>
 
     <li class="nav-item">

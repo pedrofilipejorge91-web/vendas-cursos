@@ -66,7 +66,7 @@
             <div class="review-list">
                 @forelse($cursos->avaliacoes as $avaliacao)
                     <article>
-                        <strong>{{ str_repeat('*', (int) $avaliacao->nota) }} <span>({{ $avaliacao->nota }}/5)</span></strong>
+                        <strong>{{ $avaliacao->nota }}/10 <span>pontos</span></strong>
                         <p>{{ $avaliacao->comentario }}</p>
                         <small>{{ $avaliacao->estudante->pessoa->primeironome ?? 'Aluno' }}</small>
                         @if($avaliacao->resposta_instrutor)
@@ -88,8 +88,8 @@
                         <h3>Avaliar este curso</h3>
                         <select name="nota" required>
                             <option value="">Nota</option>
-                            @for($i = 1; $i <= 5; $i++)
-                                <option value="{{ $i }}">{{ $i }} estrela(s)</option>
+                            @for($i = 0; $i <= 10; $i++)
+                                <option value="{{ $i }}">{{ $i }}/10 ponto(s)</option>
                             @endfor
                         </select>
                         <textarea name="comentario" rows="4" placeholder="Comentario"></textarea>

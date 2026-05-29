@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('avaliacoes', function (Blueprint $table) {
         $table->id();
-        $table->tinyInteger('nota')->unsigned()->checkBetween(1, 5);
+        $table->tinyInteger('nota')->unsigned()->checkBetween(0, 10);
         $table->text('comentario')->nullable();
         $table->timestamps();
          $table->unsignedBigInteger('curso_id');

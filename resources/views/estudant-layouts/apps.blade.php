@@ -45,7 +45,7 @@
   <!-- ======= Footer ======= -->
   @include('estudant-layouts.footer')
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <button type="button" class="back-to-top d-flex align-items-center justify-content-center border-0" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" aria-label="Voltar ao topo"><i class="bi bi-arrow-up-short"></i></button>
 
   <!-- Vendor JS Files -->
   <script src="{{asset('assets/vendor/apexcharts/apexcharts.min.js')}}"></script>

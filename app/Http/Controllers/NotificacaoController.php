@@ -13,7 +13,14 @@ class NotificacaoController extends Controller
             ->latest()
             ->paginate(20);
 
-        return view('notificacoes.index', compact('notificacoes'));
+        $view = match (Auth::user()?->tipo) {
+            'admin' => 'admin.notificacoes.index',
+            'estudante' => 'estudante.notificacoes',
+            'formador' => 'formador.notificacoes',
+            default => 'admin.notificacoes.index',
+        };
+
+        return view($view, compact('notificacoes'));
     }
 
     public function marcarLidas()
@@ -22,6 +29,15 @@ class NotificacaoController extends Controller
             ->whereNull('lida_em')
             ->update(['lida_em' => now()]);
 
-        return back()->with('success', 'Notificacoes marcadas como lidas.');
+        return back()->with('success', 'Notificações marcadas como lidas.');
+    }
+
+    public function destroy(Notificacao $notificacao)
+    {
+        abort_unless($notificacao->user_id === Auth::id(), 403);
+
+        $notificacao->delete();
+
+        return back()->with('success', 'Notificação apagada.');
     }
 }

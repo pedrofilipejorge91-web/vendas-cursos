@@ -173,7 +173,7 @@ class CursoAcessoController extends Controller
             'emitido_em' => now(),
         ]);
 
-        $matricula->load('curso.formador.pessoa', 'user');
+        $matricula->load('curso.formador.pessoa', 'curso.aulas', 'user');
 
         return view('estudante.certificado', compact('matricula', 'certificado'));
     }
@@ -206,6 +206,7 @@ class CursoAcessoController extends Controller
         $pdf = Pdf::loadView('estudante.certificado-pdf', [
             'matricula' => $matricula,
             'certificado' => $certificado,
+            'solicitacao' => $solicitacao,
             'qrCode' => $qrCode,
             'verificationUrl' => $verificationUrl,
             'centro' => [
@@ -214,7 +215,7 @@ class CursoAcessoController extends Controller
                 'endereco' => env('CENTRO_FORMACAO_ENDERECO', 'Angola'),
                 'contacto' => env('CENTRO_FORMACAO_CONTACTO'),
             ],
-        ]);
+        ])->setPaper('a4', 'landscape');
 
         return $pdf->download('certificado-' . Str::slug($matricula->user->name) . '.pdf');
     }

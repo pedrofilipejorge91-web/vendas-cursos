@@ -13,7 +13,7 @@ class AvaliacaoController extends Controller
     public function store(Request $request, Curso $curso)
     {
         $request->validate([
-            'nota' => 'required|integer|min:1|max:5',
+            'nota' => 'required|integer|min:0|max:10',
             'comentario' => 'nullable|string|max:1000',
         ]);
 
@@ -35,7 +35,7 @@ class AvaliacaoController extends Controller
             'comentario' => $request->comentario,
         ]);
 
-        return back()->with('success', 'Avaliacao enviada com sucesso.');
+        return back()->with('success', 'Avaliação enviada com sucesso.');
     }
 
     public function responder(Request $request, Avaliacao $avaliacao)

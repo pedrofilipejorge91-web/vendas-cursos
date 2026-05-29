@@ -70,6 +70,13 @@
     <li class="nav-heading">Plataforma</li>
 
     <li class="nav-item">
+      <a class="nav-link {{ request()->routeIs('admin.notificacoes') ? '' : 'collapsed' }}" href="{{ route('admin.notificacoes') }}">
+        <i class="bi bi-bell"></i>
+        <span>Notificações</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
       <a class="nav-link collapsed" href="{{ route('home') }}">
         <i class="bi bi-house"></i>
         <span>Ver site</span>
