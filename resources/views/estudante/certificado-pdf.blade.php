@@ -220,7 +220,7 @@
         9 => 'Setembro', 10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro',
     ];
     $emitidoEm = $certificado->emitido_em ?? now();
-    $dataExtenso = 'Luanda, aos '.$emitidoEm->format('d').' de '.$meses[(int) $emitidoEm->format('n')].' de '.$emitidoEm->format('Y').'.';
+    $dataExtenso = 'Icolo e Bengo, aos '.$emitidoEm->format('d').' de '.$meses[(int) $emitidoEm->format('n')].' de '.$emitidoEm->format('Y').'.';
     $inicioCurso = $matricula->created_at?->format('d/m/Y') ?? $emitidoEm->format('d/m/Y');
     $fimCurso = $matricula->concluido_em?->format('d/m/Y') ?? $emitidoEm->format('d/m/Y');
     $nota = $solicitacao?->nota_curso !== null ? number_format((float) $solicitacao->nota_curso, 0, ',', '.') : '__';
