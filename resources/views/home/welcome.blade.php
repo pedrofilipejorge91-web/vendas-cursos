@@ -6,15 +6,10 @@
     $heroImagem = $heroCurso?->foto ? Storage::url($heroCurso->foto) : asset('assets/img/logo.png');
     $formatarNumero = fn ($valor) => $valor > 999 ? number_format($valor / 1000, 1, ',', '.') . 'k+' : $valor;
     $paruanaImages = [
-        ['src' => asset('assets/img/paruana/hero-paruana.jpg'), 'title' => 'Centro de Formação Paruana', 'copy' => 'Formamos hoje, transformamos o amanha'],
-        ['src' => asset('assets/img/paruana/promo-cursos.jpg'), 'title' => 'Cursos em promocao', 'copy' => 'Novas oportunidades de capacitacao profissional'],
-        ['src' => asset('assets/img/paruana/turma-paruana.jpg'), 'title' => 'Turmas certificadas', 'copy' => 'Alunos preparados para novos desafios'],
-        ['src' => asset('assets/img/paruana/certificados-grupo.jpg'), 'title' => 'Certificados entregues', 'copy' => 'Reconhecimento do percurso de aprendizagem'],
-        ['src' => asset('assets/img/paruana/entrega-certificado.jpg'), 'title' => 'Entrega de diplomas', 'copy' => 'Momentos reais da comunidade Paruana'],
-        ['src' => asset('assets/img/paruana/electricidade-pratica.jpg'), 'title' => 'Electricidade pratica', 'copy' => 'Aprendizagem aplicada com trabalhos reais'],
-        ['src' => asset('assets/img/paruana/informatica-pratica.jpg'), 'title' => 'Informatica pratica', 'copy' => 'Tecnologia e competencias para o mercado'],
-        ['src' => asset('assets/img/paruana/stand-formacao.jpg'), 'title' => 'Inscricoes abertas', 'copy' => 'Atendimento e orientacao para novos alunos'],
-        ['src' => asset('assets/img/paruana/artesanato-alunas.jpg'), 'title' => 'Cursos praticos', 'copy' => 'Formação com actividades de producao'],
+        ['src' => asset('assets/img/paruana/electricidade-alunos-paruana.png'), 'title' => 'Electricidade pratica', 'copy' => 'Alunos aplicam energia, tecnologia e instalacao em projectos reais'],
+        ['src' => asset('assets/img/paruana/decoracao-alunas-paruana.png'), 'title' => 'Decoracao e criatividade', 'copy' => 'Formacao profissional com producao manual e acompanhamento'],
+        ['src' => asset('assets/img/paruana/atendimento-tecnico-paruana.png'), 'title' => 'Orientacao e suporte', 'copy' => 'Atendimento preparado para guiar o aluno em cada etapa'],
+        ['src' => asset('assets/img/paruana/director-paruana.png'), 'title' => 'Lideranca Paruana', 'copy' => 'Uma equipa comprometida com educacao, disciplina e resultados'],
     ];
 
     $servicos = $categorias->map(function ($categoria) {
@@ -42,7 +37,7 @@
     ];
 @endphp
 
-<section id="inicio" class="hero-section" style="--hero-bg: url('{{ asset('assets/img/paruana/hero-paruan.jpg') }}')">
+<section id="inicio" class="hero-section" style="--hero-bg: url('{{ asset('assets/img/paruana/electricidade-alunos-paruana.png') }}')">
     <div class="hero-visual" aria-hidden="true">
         <div class="hero-grid-lines"></div>
         <div class="chart chart-one"></div>
@@ -70,7 +65,7 @@
     <div class="site-container about-grid">
         <div class="about-media">
             <div class="about-image-card photo">
-                <img src="{{ asset('assets/img/paruana/certificados-grupo.jpg') }}" alt="Alunos certificados pela Paruana">
+                <img src="{{ asset('assets/img/paruana/decoracao-alunas-paruana.png') }}" alt="Alunas em formacao pratica de decoracao">
             </div>
         </div>
         <div class="about-copy">
@@ -192,7 +187,7 @@
 
         <div class="blog-feature">
             <div class="blog-image">
-                <img src="{{ asset('assets/img/paruana/stand-formacao.png') }}" alt="Cursos em promocao Paruana">
+                <img src="{{ asset('assets/img/paruana/atendimento-tecnico-paruana.png') }}" alt="Atendimento e orientacao Paruana">
             </div>
             <div>
                 <span>{{ $blogPosts[0]['tag'] }} - {{ $blogPosts[0]['data'] }}</span>
@@ -205,7 +200,7 @@
         <div class="blog-list">
             @foreach(array_slice($blogPosts, 1) as $post)
                 <article class="blog-row">
-                    <img src="{{ $loop->first ? asset('assets/img/paruana/promo-cursos.png') : asset('assets/img/paruana/electricidade-pratica.jpg') }}" alt="{{ $post['titulo'] }}">
+                    <img src="{{ $loop->first ? asset('assets/img/paruana/director-paruana.png') : asset('assets/img/paruana/electricidade-alunos-paruana.png') }}" alt="{{ $post['titulo'] }}">
                     <span>{{ $post['tag'] }} - {{ $post['data'] }}</span>
                     <h3>{{ $post['titulo'] }}</h3>
                     <p>{{ $post['texto'] }}</p>
