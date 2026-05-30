@@ -1,14 +1,5 @@
 <aside id="sidebar" class="sidebar formador-sidebar">
   <ul class="sidebar-nav" id="sidebar-nav">
-    <li class="sidebar-profile">
-      <div class="sidebar-profile-icon">
-        <i class="bi bi-person-video3"></i>
-      </div>
-      <div>
-        <span>Área do Formador</span>
-        <strong>{{ Auth::user()->name }}</strong>
-      </div>
-    </li>
 
     <li class="nav-item">
       <a class="nav-link {{ request()->routeIs('formador.dashboard') ? '' : 'collapsed' }}" href="{{ route('formador.dashboard') }}">

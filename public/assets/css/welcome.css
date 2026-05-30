@@ -1775,3 +1775,64 @@ img {
     text-align: left;
   }
 }
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 2rem;
+    padding: 20px 0;
+}
+
+.team-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.team-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Estilização do Círculo do Avatar */
+.team-avatar {
+    width: 120px;         /* Tamanho do círculo */
+    height: 120px;        /* Tamanho do círculo */
+    margin: 0 auto 15px;  /* Centraliza e dá espaço abaixo */
+    border-radius: 50%;   /* Torna circular */
+    background-color: #f0f0f0; /* Cor de fundo caso a imagem falhe */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    position: relative;   /* Necessário para posicionar a imagem por cima */
+    overflow: hidden;     /* Garante que a imagem não saia do círculo */
+    border: 4px solid #fff; /* Opcional: borda branca para destaque */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Estilização da Imagem dentro do Círculo */
+.team-avatar img {
+    position: absolute;   /* Fica sobreposta à letra inicial */
+    top: 0;
+    left: 0;
+    width: 100%;          /* Ocupa toda a largura do círculo */
+    height: 100%;         /* Ocupa toda a altura do círculo */
+    object-fit: cover;    /* NÃO estica a imagem, corta as sobras proporcionalmente */
+    display: block;
+}
+
+/* Ajustes de texto */
+.team-card h3 {
+    margin: 10px 0 5px;
+    font-size: 1.25rem;
+}
+
+.role {
+    color: #007bff; /* Ou a cor da sua marca */
+    font-weight: 600;
+    margin-bottom: 10px;
+}

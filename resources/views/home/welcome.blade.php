@@ -42,7 +42,7 @@
     ];
 @endphp
 
-<section id="inicio" class="hero-section" style="--hero-bg: url('{{ asset('assets/img/paruana/hero-paruana.jpg') }}')">
+<section id="inicio" class="hero-section" style="--hero-bg: url('{{ asset('assets/img/paruana/hero-paruan.jpg') }}')">
     <div class="hero-visual" aria-hidden="true">
         <div class="hero-grid-lines"></div>
         <div class="chart chart-one"></div>
@@ -192,7 +192,7 @@
 
         <div class="blog-feature">
             <div class="blog-image">
-                <img src="{{ asset('assets/img/paruana/promo-cursos.jpg') }}" alt="Cursos em promocao Paruana">
+                <img src="{{ asset('assets/img/paruana/stand-formacao.png') }}" alt="Cursos em promocao Paruana">
             </div>
             <div>
                 <span>{{ $blogPosts[0]['tag'] }} - {{ $blogPosts[0]['data'] }}</span>
@@ -205,7 +205,7 @@
         <div class="blog-list">
             @foreach(array_slice($blogPosts, 1) as $post)
                 <article class="blog-row">
-                    <img src="{{ $loop->first ? asset('assets/img/paruana/stand-formacao.jpg') : asset('assets/img/paruana/electricidade-pratica.jpg') }}" alt="{{ $post['titulo'] }}">
+                    <img src="{{ $loop->first ? asset('assets/img/paruana/promo-cursos.png') : asset('assets/img/paruana/electricidade-pratica.jpg') }}" alt="{{ $post['titulo'] }}">
                     <span>{{ $post['tag'] }} - {{ $post['data'] }}</span>
                     <h3>{{ $post['titulo'] }}</h3>
                     <p>{{ $post['texto'] }}</p>
