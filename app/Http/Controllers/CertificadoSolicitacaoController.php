@@ -103,7 +103,16 @@ class CertificadoSolicitacaoController extends Controller
         $this->notificar(
             $solicitacao->instrutor?->pessoa?->user,
             'Questionario respondido',
-            'O aluno respondeu a prova do curso '.$solicitacao->curso?->titulo.'. Faca a correcao e atribua uma nota.'
+            'O aluno respondeu a prova do curso '.$solicitacao->curso?->titulo.'. Faca a correcao e atribua uma nota.',
+            [
+                'linhas' => [
+                    'Curso' => $solicitacao->curso?->titulo ?? '-',
+                    'Estado' => 'Aguardando correcao',
+                ],
+                'acao_url' => route('formador.certificados.questionario', $solicitacao),
+                'acao_texto' => 'Corrigir prova',
+                'preheader' => 'Uma prova de certificado foi respondida.',
+            ]
         );
 
         return back()->with('success', 'Respostas enviadas ao formador com sucesso.');
@@ -118,9 +127,17 @@ class CertificadoSolicitacaoController extends Controller
         abort_unless($formadorId && (int) $solicitacao->instrutor_id === (int) $formadorId, 403);
         abort_if($solicitacao->status === CertificadoSolicitacao::STATUS_APROVADO, 403);
 
-        $request->validate([
-            'perguntas_texto' => 'required|string|max:10000',
+        $validated = $request->validate([
+            'perguntas' => 'required|array|min:1|max:50',
+            'perguntas.*' => 'required|string|max:1000',
         ]);
+
+        $perguntas = collect($validated['perguntas'])
+            ->map(fn ($pergunta) => trim((string) $pergunta))
+            ->filter()
+            ->values();
+
+        abort_unless($perguntas->isNotEmpty(), 422, 'Informe pelo menos uma pergunta.');
 
         $questionario = CertificadoQuestionario::updateOrCreate(
             [
@@ -129,7 +146,7 @@ class CertificadoSolicitacaoController extends Controller
             [
                 'curso_id' => $solicitacao->curso_id,
                 'solicitacao_id' => $solicitacao->id,
-                'perguntas' => $request->perguntas_texto,
+                'perguntas' => json_encode($perguntas->all(), JSON_UNESCAPED_UNICODE),
                 'criado_em' => now(),
                 'fechado_em' => null,
             ]
@@ -147,7 +164,16 @@ class CertificadoSolicitacaoController extends Controller
         $this->notificar(
             $solicitacao->matricula?->user,
             'Prova de certificado disponivel',
-            'O formador publicou a prova do curso '.$solicitacao->curso?->titulo.'. Responda para continuar o processo do certificado.'
+            'O formador publicou a prova do curso '.$solicitacao->curso?->titulo.'. Responda para continuar o processo do certificado.',
+            [
+                'linhas' => [
+                    'Curso' => $solicitacao->curso?->titulo ?? '-',
+                    'Estado' => 'Aguardando resposta do aluno',
+                ],
+                'acao_url' => route('estudante.certificados.questionario', $solicitacao->matricula_id),
+                'acao_texto' => 'Responder prova',
+                'preheader' => 'A prova para emissao do certificado esta disponivel.',
+            ]
         );
 
         return back()->with('success', 'Questionario publicado para o aluno.');
@@ -184,7 +210,17 @@ class CertificadoSolicitacaoController extends Controller
             $this->notificar(
                 $adminUser,
                 'Certificado aguardando aprovacao',
-                'O formador corrigiu a prova e atribuiu nota ao aluno. Aprove ou rejeite a liberacao do certificado.'
+                'O formador corrigiu a prova e atribuiu nota ao aluno. Aprove ou rejeite a liberacao do certificado.',
+                [
+                    'linhas' => [
+                        'Curso' => $solicitacao->curso?->titulo ?? '-',
+                        'Nota' => $solicitacao->nota_curso,
+                        'Estado' => 'Aguardando aprovacao administrativa',
+                    ],
+                    'acao_url' => route('admin.certificados.solicitacoes'),
+                    'acao_texto' => 'Rever certificado',
+                    'preheader' => 'Certificado pronto para decisao administrativa.',
+                ]
             );
         });
 
@@ -236,7 +272,20 @@ class CertificadoSolicitacaoController extends Controller
             $status === CertificadoSolicitacao::STATUS_APROVADO ? 'Certificado liberado' : 'Certificado rejeitado',
             $status === CertificadoSolicitacao::STATUS_APROVADO
                 ? 'O admin aprovou o seu certificado. Ja pode baixar o PDF.'
-                : 'O admin rejeitou a liberacao do certificado. Consulte as observacoes e fale com o formador.'
+                : 'O admin rejeitou a liberacao do certificado. Consulte as observacoes e fale com o formador.',
+            [
+                'linhas' => [
+                    'Curso' => $solicitacao->curso?->titulo ?? '-',
+                    'Estado' => $status === CertificadoSolicitacao::STATUS_APROVADO ? 'Aprovado' : 'Rejeitado',
+                ],
+                'acao_url' => $status === CertificadoSolicitacao::STATUS_APROVADO
+                    ? route('estudante.certificado', $solicitacao->matricula_id)
+                    : route('estudante.certificados.questionario', $solicitacao->matricula_id),
+                'acao_texto' => $status === CertificadoSolicitacao::STATUS_APROVADO ? 'Baixar certificado' : 'Ver detalhes',
+                'preheader' => $status === CertificadoSolicitacao::STATUS_APROVADO
+                    ? 'O seu certificado foi aprovado.'
+                    : 'A sua solicitacao de certificado foi rejeitada.',
+            ]
         );
 
         return back()->with('success', $status === CertificadoSolicitacao::STATUS_APROVADO ? 'Solicitacao aprovada.' : 'Solicitacao rejeitada.');
@@ -267,7 +316,17 @@ class CertificadoSolicitacaoController extends Controller
         $this->notificar(
             $matricula->curso?->formador?->pessoa?->user,
             'Aluno concluiu o curso',
-            'O aluno '.$matricula->user?->name.' concluiu o curso '.$matricula->curso?->titulo.'. Crie a prova para iniciar a liberacao do certificado.'
+            'O aluno '.$matricula->user?->name.' concluiu o curso '.$matricula->curso?->titulo.'. Crie a prova para iniciar a liberacao do certificado.',
+            [
+                'linhas' => [
+                    'Aluno' => $matricula->user?->name ?? '-',
+                    'Curso' => $matricula->curso?->titulo ?? '-',
+                    'Progresso' => '100%',
+                ],
+                'acao_url' => route('formador.certificados.questionario', $solicitacao),
+                'acao_texto' => 'Criar prova',
+                'preheader' => 'Aluno concluiu o curso e aguarda prova de certificado.',
+            ]
         );
 
         return $solicitacao;
@@ -275,13 +334,20 @@ class CertificadoSolicitacaoController extends Controller
 
     private function perguntas(?CertificadoQuestionario $questionario): array
     {
-        return array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) $questionario?->perguntas))));
+        $conteudo = (string) $questionario?->perguntas;
+        $perguntasJson = json_decode($conteudo, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($perguntasJson)) {
+            return array_values(array_filter(array_map('trim', $perguntasJson)));
+        }
+
+        return array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $conteudo))));
     }
 
-    private function notificar(?User $user, string $titulo, string $mensagem): void
+    private function notificar(?User $user, string $titulo, string $mensagem, array $emailDados = []): void
     {
         try {
-            app(NotificacaoService::class)->enviar($user, $titulo, $mensagem, ['email', 'sms', 'whatsapp']);
+            app(NotificacaoService::class)->enviar($user, $titulo, $mensagem, ['email', 'sms', 'whatsapp'], $emailDados);
         } catch (\Throwable $e) {
             // O fluxo principal nao deve falhar se a entrega externa estiver indisponivel.
         }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Aula;
+use App\Models\Avaliacao;
 use App\Models\Certificado;
 use App\Models\CertificadoSolicitacao;
 use App\Models\Curso;
@@ -122,10 +123,11 @@ class CursoAcessoController extends Controller
     {
         $this->autorizarAluno($matricula);
 
-        $matricula->load('curso.aulas', 'progressos', 'certificado');
+        $matricula->load('curso.aulas', 'curso.avaliacoes.estudante.pessoa', 'progressos', 'certificado');
         $aulaAtual = $matricula->curso->aulas->first();
+        $minhaAvaliacao = $this->obterMinhaAvaliacao($matricula);
 
-        return view('estudante.curso', compact('matricula', 'aulaAtual'));
+        return view('estudante.curso', compact('matricula', 'aulaAtual', 'minhaAvaliacao'));
     }
 
     public function aula(Matricula $matricula, Aula $aula)
@@ -133,10 +135,11 @@ class CursoAcessoController extends Controller
         $this->autorizarAluno($matricula);
         abort_unless($aula->curso_id === $matricula->curso_id, 404);
 
-        $matricula->load('curso.aulas', 'progressos', 'certificado');
+        $matricula->load('curso.aulas', 'curso.avaliacoes.estudante.pessoa', 'progressos', 'certificado');
         $aulaAtual = $aula;
+        $minhaAvaliacao = $this->obterMinhaAvaliacao($matricula);
 
-        return view('estudante.curso', compact('matricula', 'aulaAtual'));
+        return view('estudante.curso', compact('matricula', 'aulaAtual', 'minhaAvaliacao'));
     }
 
     public function concluirAula(Request $request, Matricula $matricula, Aula $aula)
@@ -290,9 +293,19 @@ class CursoAcessoController extends Controller
             if ($userInstrutor) {
                 app(\App\Services\NotificacaoService::class)->enviar(
                     $userInstrutor,
-                    'Solicitação de certificado criada',
-                    'O aluno concluiu o curso. Você deve elaborar o questionário e submeter para aprovação do admin.',
-                    ['email', 'sms', 'whatsapp']
+                    'Solicitacao de certificado criada',
+                    'O aluno concluiu o curso '.$matricula->curso?->titulo.'. Elabore o questionario para dar continuidade ao processo de emissao do certificado.',
+                    ['email', 'sms', 'whatsapp'],
+                    [
+                        'linhas' => [
+                            'Aluno' => $matricula->user?->name ?? '-',
+                            'Curso' => $matricula->curso?->titulo ?? '-',
+                            'Progresso' => '100%',
+                        ],
+                        'acao_url' => route('formador.certificados.questionario', $solicitacao),
+                        'acao_texto' => 'Criar questionario',
+                        'preheader' => 'Aluno concluiu o curso e aguarda questionario de certificado.',
+                    ]
                 );
             }
         } catch (\Throwable $e) {
@@ -303,6 +316,19 @@ class CursoAcessoController extends Controller
     private function autorizarAluno(Matricula $matricula): void
     {
         abort_unless($matricula->user_id === Auth::id() || Auth::user()?->tipo === 'admin', 403);
+    }
+
+    private function obterMinhaAvaliacao(Matricula $matricula): ?Avaliacao
+    {
+        $estudanteId = Auth::user()?->pessoa?->estudante?->id;
+
+        if (! $estudanteId) {
+            return null;
+        }
+
+        return Avaliacao::where('curso_id', $matricula->curso_id)
+            ->where('estudante_id', $estudanteId)
+            ->first();
     }
 
 }

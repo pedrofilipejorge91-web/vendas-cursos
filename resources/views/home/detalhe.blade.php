@@ -66,7 +66,12 @@
             <div class="review-list">
                 @forelse($cursos->avaliacoes as $avaliacao)
                     <article>
-                        <strong>{{ $avaliacao->nota }}/10 <span>pontos</span></strong>
+                        <div class="review-stars" aria-label="{{ $avaliacao->nota }} de 5 estrelas">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="bi {{ $i <= $avaliacao->nota ? 'bi-star-fill' : 'bi-star' }}"></i>
+                            @endfor
+                            <strong>{{ $avaliacao->nota }}/5</strong>
+                        </div>
                         <p>{{ $avaliacao->comentario }}</p>
                         <small>{{ $avaliacao->estudante->pessoa->primeironome ?? 'Aluno' }}</small>
                         @if($avaliacao->resposta_instrutor)
@@ -82,21 +87,10 @@
             </div>
 
             @auth
-                @if($minhaMatricula && $minhaMatricula->progresso >= 70)
-                    <form action="{{ route('avaliacoes.store', $cursos) }}" method="POST" class="review-form">
-                        @csrf
-                        <h3>Avaliar este curso</h3>
-                        <select name="nota" required>
-                            <option value="">Nota</option>
-                            @for($i = 0; $i <= 10; $i++)
-                                <option value="{{ $i }}">{{ $i }}/10 ponto(s)</option>
-                            @endfor
-                        </select>
-                        <textarea name="comentario" rows="4" placeholder="Comentario"></textarea>
-                        <button type="submit">Enviar avaliacao</button>
-                    </form>
+                @if($minhaMatricula && $minhaMatricula->progresso >= 50)
+                    @include('components.course-rating-form', ['curso' => $cursos, 'minhaAvaliacao' => $minhaAvaliacao])
                 @elseif($minhaMatricula)
-                    <p class="muted">Conclua pelo menos 70% do curso para avaliar.</p>
+                    <p class="muted">Conclua pelo menos 50% do curso para avaliar.</p>
                 @endif
             @endauth
         </div>

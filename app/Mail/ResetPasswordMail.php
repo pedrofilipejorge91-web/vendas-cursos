@@ -25,7 +25,7 @@ class ResetPasswordMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Recuperação de Senha - Centro de Formação Paruana Comercial',
+            subject: 'Recuperacao de senha - Paruana Comercial',
         );
     }
 

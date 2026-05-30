@@ -100,8 +100,13 @@ class HomeController extends Controller
         $minhaMatricula = auth()->check()
             ? \App\Models\Matricula::where('user_id', auth()->id())->where('curso_id', $id)->first()
             : null;
+        $minhaAvaliacao = auth()->check()
+            ? Avaliacao::where('curso_id', $id)
+                ->where('estudante_id', auth()->user()?->pessoa?->estudante?->id)
+                ->first()
+            : null;
 
-        return view('home.detalhe', compact('cursos','aulas', 'minhaMatricula'));
+        return view('home.detalhe', compact('cursos','aulas', 'minhaMatricula', 'minhaAvaliacao'));
 
 
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Pessoa;
 use App\Models\Estudante;
+use App\Services\NotificacaoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -74,6 +75,22 @@ class EstudanteController extends Controller
         ]);
 
         DB::commit();
+
+        app(NotificacaoService::class)->enviar(
+            $user,
+            'Conta de aluno criada',
+            'A equipa administrativa criou a sua conta de aluno. A conta ainda precisa de activacao para permitir o acesso.',
+            ['email'],
+            [
+                'linhas' => [
+                    'Perfil' => 'Aluno',
+                    'Estado da conta' => 'Inactivo',
+                ],
+                'acao_url' => route('login'),
+                'acao_texto' => 'Abrir plataforma',
+                'rodape' => 'Use o email cadastrado e a senha definida no registo administrativo para iniciar sessao quando a conta estiver activa.',
+            ]
+        );
 
         return redirect()->back()->with('success', 'Estudante criado com sucesso!');
 
@@ -191,6 +208,27 @@ class EstudanteController extends Controller
         : 'ativo';
 
     $estudante->save();
+
+    $user = $estudante->pessoa?->user;
+    $ativo = $estudante->status === 'ativo';
+
+    app(NotificacaoService::class)->enviar(
+        $user,
+        $ativo ? 'Conta activada' : 'Conta desactivada',
+        $ativo
+            ? 'A sua conta de aluno foi activada. Ja pode iniciar sessao e aceder aos cursos disponiveis.'
+            : 'A sua conta de aluno foi desactivada temporariamente. Se precisar de ajuda, contacte a administracao.',
+        ['email', 'sms'],
+        [
+            'linhas' => [
+                'Estado da conta' => $ativo ? 'Activo' : 'Inactivo',
+                'Perfil' => 'Aluno',
+            ],
+            'acao_url' => $ativo ? route('login') : null,
+            'acao_texto' => 'Entrar na plataforma',
+            'preheader' => $ativo ? 'A sua conta ja esta activa.' : 'O acesso a sua conta foi suspenso.',
+        ]
+    );
 
     return redirect()->back()
         ->with('success', 'Status actualizado com sucesso!');

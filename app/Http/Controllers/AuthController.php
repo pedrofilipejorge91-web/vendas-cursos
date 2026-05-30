@@ -9,6 +9,7 @@ use App\Models\Pessoa;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Services\NotificacaoService;
 
 class AuthController extends Controller
 {
@@ -81,6 +82,43 @@ class AuthController extends Controller
             ]);
 
             DB::commit();
+
+            $notificador = app(NotificacaoService::class);
+            $notificador->enviar(
+                $user,
+                'Conta criada com sucesso',
+                'A sua conta de aluno foi criada e esta em analise. Assim que o administrador activar a conta, avisaremos por email.',
+                ['email'],
+                [
+                    'intro' => 'Bem-vindo a Paruana Comercial.',
+                    'linhas' => [
+                        'Estado da conta' => 'Aguardando activacao',
+                        'Perfil' => 'Aluno',
+                    ],
+                    'acao_url' => route('login'),
+                    'acao_texto' => 'Ir para login',
+                    'rodape' => 'Enquanto aguarda a activacao, pode guardar este email como confirmacao do seu cadastro.',
+                    'preheader' => 'Cadastro recebido e aguardando activacao administrativa.',
+                ]
+            );
+
+            User::where('tipo', 'admin')->each(function (User $admin) use ($notificador, $user) {
+                $notificador->enviar(
+                    $admin,
+                    'Nova conta de aluno aguardando activacao',
+                    'O aluno '.$user->name.' concluiu o cadastro e precisa de activacao para aceder a plataforma.',
+                    ['email'],
+                    [
+                        'linhas' => [
+                            'Aluno' => $user->name,
+                            'Email' => $user->email,
+                        ],
+                        'acao_url' => route('estudante.index'),
+                        'acao_texto' => 'Rever alunos',
+                        'preheader' => 'Existe um novo aluno aguardando activacao.',
+                    ]
+                );
+            });
 
             return redirect()->route('login')
                 ->with('success', 'Conta criada! Aguarde aprovação do administrador.');

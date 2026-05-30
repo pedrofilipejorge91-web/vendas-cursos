@@ -41,19 +41,31 @@ class ForgotPasswordController extends Controller
             app(NotificacaoService::class)->enviar(
                 $user,
                 'Recuperacao de senha',
-                'Use este link para redefinir a sua senha: '.$url,
+                'Paruana Comercial: redefina a sua senha neste link valido por 60 minutos: '.$url,
                 ['sms']
             );
 
             return back()->with(['status' => 'Link de recuperacao enviado por SMS, se o servico estiver configurado.']);
         }
 
-        $status = Password::sendResetLink(
-            $request->only('email')
+        $user = User::where('email', $request->email)->firstOrFail();
+        $token = Password::broker()->createToken($user);
+        $url = route('password.reset', ['token' => $token, 'email' => $user->email]);
+
+        app(NotificacaoService::class)->enviar(
+            $user,
+            'Recuperacao de senha',
+            'Recebemos um pedido para redefinir a senha da sua conta. O link abaixo e valido por 60 minutos.',
+            ['email'],
+            [
+                'intro' => 'Use o botao para criar uma nova senha e voltar a aceder aos seus cursos.',
+                'acao_url' => $url,
+                'acao_texto' => 'Redefinir senha',
+                'rodape' => 'Se nao solicitou esta recuperacao, ignore este email. A sua senha actual continuara a funcionar.',
+                'preheader' => 'Link seguro para recuperar o acesso a sua conta.',
+            ]
         );
 
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with(['status' => trans($status)])
-            : back()->withErrors(['email' => trans($status)]);
+        return back()->with(['status' => 'Enviamos o link de recuperacao para o seu email.']);
     }
 }

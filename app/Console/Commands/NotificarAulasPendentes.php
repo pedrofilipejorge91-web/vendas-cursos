@@ -34,7 +34,17 @@ class NotificarAulasPendentes extends Command
                         $matricula->user,
                         'Aulas pendentes',
                         $mensagem,
-                        ['email', 'sms', 'whatsapp']
+                        ['email', 'sms', 'whatsapp'],
+                        [
+                            'linhas' => [
+                                'Curso' => $matricula->curso?->titulo ?? '-',
+                                'Progresso' => number_format((float) $matricula->progresso, 0).'%',
+                                'Proxima aula' => $proximaAula?->titulo ?? 'Conteudo pendente',
+                            ],
+                            'acao_url' => route('estudante.curso', $matricula),
+                            'acao_texto' => 'Continuar curso',
+                            'preheader' => 'Continue de onde parou no seu curso.',
+                        ]
                     );
 
                     $total++;

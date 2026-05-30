@@ -2,7 +2,10 @@
 
 @section('content')
 @php
-    $perguntas = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) ($questionario?->perguntas ?? '')))));
+    $perguntasJson = json_decode((string) ($questionario?->perguntas ?? ''), true);
+    $perguntas = json_last_error() === JSON_ERROR_NONE && is_array($perguntasJson)
+        ? array_values(array_filter(array_map('trim', $perguntasJson)))
+        : array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) ($questionario?->perguntas ?? '')))));
     $respostas = $resposta ? json_decode($resposta->respostas, true) : [];
     $podeResponder = $questionario && !empty($perguntas) && !in_array($solicitacao->status, [
         \App\Models\CertificadoSolicitacao::STATUS_AGUARDANDO_ADMIN,

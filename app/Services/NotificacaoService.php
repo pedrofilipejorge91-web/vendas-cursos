@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Mail;
 
 class NotificacaoService
 {
-    public function enviar(?User $user, string $titulo, string $mensagem, array $canais = ['email']): void
+    public function enviar(?User $user, string $titulo, string $mensagem, array $canais = ['email'], array $emailDados = []): void
     {
         foreach ($canais as $canal) {
             Notificacao::create([
@@ -21,7 +21,7 @@ class NotificacaoService
             ]);
 
             if ($canal === 'email') {
-                $this->enviarEmail($user, $titulo, $mensagem);
+                $this->enviarEmail($user, $titulo, $mensagem, $emailDados);
             }
 
             if ($canal === 'sms') {
@@ -34,14 +34,24 @@ class NotificacaoService
         }
     }
 
-    private function enviarEmail(?User $user, string $titulo, string $mensagem): void
+    private function enviarEmail(?User $user, string $titulo, string $mensagem, array $dados = []): void
     {
         if (! $user?->email) {
             return;
         }
 
         try {
-            Mail::raw($mensagem, function ($message) use ($user, $titulo) {
+            Mail::send('emails.activity', [
+                'user' => $user,
+                'titulo' => $titulo,
+                'mensagem' => $mensagem,
+                'intro' => $dados['intro'] ?? null,
+                'linhas' => $dados['linhas'] ?? [],
+                'acaoUrl' => $dados['acao_url'] ?? null,
+                'acaoTexto' => $dados['acao_texto'] ?? 'Abrir plataforma',
+                'rodape' => $dados['rodape'] ?? null,
+                'preheader' => $dados['preheader'] ?? $mensagem,
+            ], function ($message) use ($user, $titulo) {
                 $message->to($user->email)->subject($titulo);
             });
         } catch (\Throwable $e) {

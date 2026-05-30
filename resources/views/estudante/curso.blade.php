@@ -18,6 +18,9 @@
         'quiz' => 'bi-ui-checks',
         'texto' => 'bi-card-text',
     ];
+    $comentariosCurso = $matricula->curso->avaliacoes
+        ->filter(fn ($avaliacao) => filled($avaliacao->comentario))
+        ->sortByDesc('created_at');
 @endphp
 
 <style>
@@ -114,6 +117,131 @@
     .sticky-learning-panel {
         position: sticky;
         top: 86px;
+    }
+
+    .course-rating-form {
+        display: grid;
+        gap: 12px;
+    }
+
+    .course-rating-form h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .course-rating-field {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        border: 0;
+        padding: 0;
+        margin: 0;
+    }
+
+    .course-rating-field legend {
+        width: 100%;
+        margin: 0;
+        color: #6b7280;
+        font-size: .82rem;
+        font-weight: 600;
+    }
+
+    .rating-zero input,
+    .star-rating input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .rating-zero span,
+    .star-rating label {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        color: #9ca3af;
+        cursor: pointer;
+        transition: color .15s ease, border-color .15s ease, background .15s ease;
+    }
+
+    .rating-zero input:checked + span,
+    .rating-zero:hover span {
+        border-color: #2563eb;
+        background: #eff6ff;
+        color: #2563eb;
+        font-weight: 700;
+    }
+
+    .star-rating {
+        display: inline-flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 4px;
+    }
+
+    .star-rating label {
+        font-size: 1rem;
+    }
+
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        border-color: #f59e0b;
+        background: #fffbeb;
+        color: #f59e0b;
+    }
+
+    .course-rating-form textarea {
+        width: 100%;
+        min-height: 92px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 10px 12px;
+        resize: vertical;
+    }
+
+    .course-review-submit {
+        min-height: 40px;
+        border: 0;
+        border-radius: 8px;
+        color: #fff;
+        background: #2563eb;
+        font-weight: 700;
+    }
+
+    .student-comment-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .student-comment {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px;
+        background: #fff;
+    }
+
+    .student-comment-stars {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        color: #f59e0b;
+        font-size: .9rem;
+    }
+
+    .student-comment-reply {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #1e3a8a;
+        font-size: .88rem;
     }
 
     @media (max-width: 991.98px) {
@@ -357,6 +485,44 @@
                         <div class="d-flex justify-content-between small">
                             <span>Tempo total</span>
                             <strong>{{ $tempoTotal }} min</strong>
+                        </div>
+                    </div>
+
+                    <div class="lesson-panel p-3 mt-3">
+                        @if($matricula->progresso >= 50)
+                            @include('components.course-rating-form', ['curso' => $matricula->curso, 'minhaAvaliacao' => $minhaAvaliacao])
+                        @else
+                            <h3 class="h6 fw-bold mb-2">Avaliar curso</h3>
+                            <p class="text-muted small mb-0">Conclua pelo menos 50% do curso para avaliar.</p>
+                        @endif
+                    </div>
+
+                    <div class="lesson-panel p-3 mt-3">
+                        <h3 class="h6 fw-bold mb-3">Comentarios do curso</h3>
+                        <div class="student-comment-list">
+                            @forelse($comentariosCurso as $comentario)
+                                <article class="student-comment">
+                                    <div class="d-flex justify-content-between gap-2 mb-2">
+                                        <strong class="small">{{ $comentario->estudante?->pessoa?->primeironome ?? 'Aluno' }}</strong>
+                                        <span class="text-muted small">{{ $comentario->created_at?->format('d/m/Y') }}</span>
+                                    </div>
+                                    <div class="student-comment-stars" aria-label="{{ $comentario->nota }} de 5 estrelas">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i class="bi {{ $i <= $comentario->nota ? 'bi-star-fill' : 'bi-star' }}"></i>
+                                        @endfor
+                                        <span class="text-muted ms-1">{{ $comentario->nota }}/5</span>
+                                    </div>
+                                    <p class="small text-muted mt-2 mb-0">{{ $comentario->comentario }}</p>
+                                    @if($comentario->resposta_instrutor)
+                                        <div class="student-comment-reply">
+                                            <strong class="d-block mb-1">Resposta do formador</strong>
+                                            {{ $comentario->resposta_instrutor }}
+                                        </div>
+                                    @endif
+                                </article>
+                            @empty
+                                <p class="text-muted small mb-0">Ainda nao ha comentarios neste curso.</p>
+                            @endforelse
                         </div>
                     </div>
                 </div>

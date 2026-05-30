@@ -90,8 +90,19 @@ class PagamentoController extends Controller
         app(NotificacaoService::class)->enviar(
             Auth::user(),
             'Pedido criado',
-            'Seu pedido '.$pedido->referencia.' foi criado e esta aguardando pagamento.',
-            ['email', 'sms', 'whatsapp']
+            'O seu pedido '.$pedido->referencia.' foi criado e esta aguardando pagamento. Complete o pagamento dentro do prazo para garantir o acesso aos cursos.',
+            ['email', 'sms', 'whatsapp'],
+            [
+                'linhas' => [
+                    'Pedido' => $pedido->referencia,
+                    'Total' => number_format((float) $pedido->total, 2, ',', '.').' Kz',
+                    'Estado' => 'Aguardando pagamento',
+                    'Valido ate' => $pedido->expira_em?->format('d/m/Y H:i') ?? '-',
+                ],
+                'acao_url' => route('pagamento.comprovante', $pedido),
+                'acao_texto' => 'Ver instrucoes de pagamento',
+                'preheader' => 'Pedido criado e aguardando pagamento.',
+            ]
         );
 
         return redirect()
@@ -138,8 +149,18 @@ class PagamentoController extends Controller
         app(NotificacaoService::class)->enviar(
             $pedido->user,
             'Matricula confirmada',
-            'O acesso aos cursos do pedido '.$pedido->referencia.' foi liberado.',
-            ['email', 'sms', 'whatsapp']
+            'Confirmamos o pagamento do pedido '.$pedido->referencia.'. O acesso aos cursos ja esta liberado na sua area de aluno.',
+            ['email', 'sms', 'whatsapp'],
+            [
+                'linhas' => [
+                    'Pedido' => $pedido->referencia,
+                    'Estado' => 'Pago',
+                    'Cursos liberados' => $pedido->itens->count(),
+                ],
+                'acao_url' => route('estudante.cursos'),
+                'acao_texto' => 'Acessar meus cursos',
+                'preheader' => 'Pagamento confirmado e matricula liberada.',
+            ]
         );
     }
 

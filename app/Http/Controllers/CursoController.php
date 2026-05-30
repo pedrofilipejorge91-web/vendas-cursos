@@ -147,8 +147,17 @@ public function destroy($id)
                 $notificador->enviar(
                     $usuario,
                     'Novo curso publicado',
-                    'O curso '.$curso->titulo.' ja esta disponivel no catalogo.',
-                    ['email', 'whatsapp']
+                    'O curso '.$curso->titulo.' ja esta disponivel no catalogo. Veja o programa, valor e detalhes para decidir se este e o seu proximo passo.',
+                    ['email', 'whatsapp'],
+                    [
+                        'linhas' => [
+                            'Curso' => $curso->titulo,
+                            'Estado' => 'Publicado',
+                        ],
+                        'acao_url' => route('home.detalhe', $curso->id),
+                        'acao_texto' => 'Ver curso',
+                        'preheader' => 'Novo curso disponivel no catalogo.',
+                    ]
                 );
             }
         });

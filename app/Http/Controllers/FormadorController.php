@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Pessoa;
 use App\Models\Formador;
+use App\Services\NotificacaoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -95,6 +96,24 @@ class FormadorController extends Controller
             ]);
 
             DB::commit();
+
+            app(NotificacaoService::class)->enviar(
+                $user,
+                'Conta de formador criada',
+                'A sua conta de formador foi criada na plataforma. Ja pode iniciar sessao para gerir cursos, aulas, comentarios e certificados.',
+                ['email'],
+                [
+                    'intro' => 'Bem-vindo a area de formadores da Paruana Comercial.',
+                    'linhas' => [
+                        'Perfil' => 'Formador',
+                        'Especialidade' => $request->especialidade,
+                    ],
+                    'acao_url' => route('login'),
+                    'acao_texto' => 'Entrar na plataforma',
+                    'rodape' => 'Use o email cadastrado e a senha definida no registo administrativo para iniciar sessao.',
+                    'preheader' => 'A sua conta de formador esta pronta.',
+                ]
+            );
 
                   return redirect()->back()->with('success', 'Formador cadastrado com sucesso!');
 

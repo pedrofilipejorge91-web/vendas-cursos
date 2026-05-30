@@ -1,16 +1,14 @@
 @component('mail::message')
-# Recuperação de Senha
+# Recuperacao de senha
 
-Você recebeu este email porque solicitou uma recuperação de senha.
+Recebemos um pedido para redefinir a senha da sua conta na plataforma {{ config('app.name') }}.
 
 @component('mail::button', ['url' => $url])
-Redefinir Senha
+Redefinir senha
 @endcomponent
 
-Este link expirará em 60 minutos.
+Este link expira em 60 minutos. Se nao foi voce, ignore esta mensagem.
 
-Se você não solicitou uma recuperação de senha, ignore este email.
-
-Obrigado,<br>
+Atenciosamente,<br>
 {{ config('app.name') }}
 @endcomponent
