@@ -4,18 +4,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ResetPasswordController;
-use App\Http\controllers\AulaController;
-use App\Http\controllers\AdminDashboardController;
+use App\Http\Controllers\AulaController;
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\CarrinhoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\CursoAcessoController;
-use App\Http\controllers\CursoController;
-use App\Http\controllers\EstudanteController;
+use App\Http\Controllers\CursoController;
+use App\Http\Controllers\EstudanteController;
 use App\Http\Controllers\FormadorController;
 use App\Http\Controllers\FormadorAreaController;
-use App\Http\controllers\FormadorDashboardController;
+use App\Http\Controllers\FormadorDashboardController;
 use App\Http\Controllers\HomeController;
-use App\Http\controllers\InscricaoController;
 use App\Http\Controllers\PagamentoController;
 use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\AvaliacaoController;
@@ -69,17 +68,17 @@ Route::middleware(['auth', 'tipo:admin'])->group(function () {
     Route::put('/admin/formadores/{id}', [FormadorController::class, 'update'])->name('formador.update');
     Route::delete('/admin/formadores/{id}', [FormadorController::class, 'destroy'])->name('formador.destroy');
 
-   Route::get('/admin/Categoria/dashboard',[CategoriaController::class, 'index' ])->name('categoria.index');
+Route::get('/admin/Categoria/dashboard',[CategoriaController::class, 'index' ])->name('categoria.index');
 Route::get('/admin/Categoria/Create',[CategoriaController::class, 'create' ])->name('categoria.create');
 Route::post('/admin/Categoria/store',[CategoriaController::class, 'store'])->name('categoria.store');
-Route::match(['post','get','put','delete'],'/admin/Categoria/delete/{id}',[CategoriaController::class, 'destroy'])->name('categoria.destroy');
-Route::match(['post','get','put','delete'],'/admin/Categoria/update/{id}',[CategoriaController::class, 'update'])->name('categoria.update');
+Route::delete('/admin/Categoria/delete/{id}',[CategoriaController::class, 'destroy'])->name('categoria.destroy');
+Route::put('/admin/Categoria/update/{id}',[CategoriaController::class, 'update'])->name('categoria.update');
  
 
     Route::get('/admin/cursos', [CursoController::class, 'index'])->name('curso.index');
     Route::post('/admin/cursos', [CursoController::class, 'store'])->name('curso.store');
     Route::put('/admin/cursos/{id}', [CursoController::class, 'update'])->name('curso.update');
-    Route::delete('/admin/cursos/{id}', [CursoController::class, 'destroy'])->name('curso.detroy');
+    Route::delete('/admin/cursos/{id}', [CursoController::class, 'destroy'])->name('curso.destroy');
     Route::post('/admin/cursos/{id}/publicar', [CursoController::class, 'publicar'])->name('curso.publicar');
     Route::post('/admin/cursos/{id}/rejeitar', [CursoController::class, 'rejeitar'])->name('curso.rejeitar');
 
@@ -87,7 +86,7 @@ Route::match(['post','get','put','delete'],'/admin/Categoria/update/{id}',[Categ
     Route::post('/admin/aulas', [AulaController::class, 'store'])->name('aula.store');
     Route::get('/admin/aulas/{aula}/show', [AulaController::class, 'show'])->name('aulas.show');
     Route::put('/admin/aulas/{id}', [AulaController::class, 'update'])->name('aulas.update');
-    Route::match(['post','get','put','delete'],'/admin/aulas/{id}', [AulaController::class, 'destroy'])->name('aulas.destroy');
+    Route::delete('/admin/aulas/{id}', [AulaController::class, 'destroy'])->name('aulas.destroy');
 
     
     Route::get('/admin/estudante', [EstudanteController::class, 'index'])->name('estudante.index');

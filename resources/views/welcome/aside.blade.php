@@ -37,7 +37,7 @@
 
 
       <li class="nav-item">
-        <a class="nav-link collapsed" href="{{route('categoria.indedx')}}">
+        <a class="nav-link collapsed" href="{{route('categoria.index')}}">
           <i class="bi bi-mortarboard"></i>
           <span>Categórias</span>
         </a> 

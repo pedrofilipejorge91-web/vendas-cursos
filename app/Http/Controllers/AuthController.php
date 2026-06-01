@@ -48,8 +48,6 @@ class AuthController extends Controller
         DB::beginTransaction();
 
         try {
-
-            // 1. USER
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -59,7 +57,6 @@ class AuthController extends Controller
                 'privacidade_aceite_em' => now(),
             ]);
 
-            // 2. PESSOA
             $pessoa = Pessoa::create([
                 'user_id' => $user->id,
                 'primeironome' => $request->primeironome,
@@ -73,7 +70,6 @@ class AuthController extends Controller
                 'contacto' => $request->contacto,
             ]);
 
-            // 3. ESTUDANTE (INATIVO POR PADRÃO)
             Estudante::create([
                 'pessoa_id' => $pessoa->id,
                 'escola_actual' => $request->escola_actual,
@@ -86,8 +82,8 @@ class AuthController extends Controller
             $notificador = app(NotificacaoService::class);
             $notificador->enviar(
                 $user,
-                'Conta criada com sucesso',
-                'A sua conta de aluno foi criada e esta em analise. Assim que o administrador activar a conta, avisaremos por email.',
+                'Inscricao recebida com sucesso',
+                'A sua inscricao foi recebida com sucesso e sera analisada pela administracao. Assim que a conta for aprovada, recebera uma notificacao e podera usufruir dos nossos servicos.',
                 ['email'],
                 [
                     'intro' => 'Bem-vindo a Paruana Comercial.',
@@ -121,8 +117,7 @@ class AuthController extends Controller
             });
 
             return redirect()->route('login')
-                ->with('success', 'Conta criada! Aguarde aprovação do administrador.');
-
+                ->with('success', 'Inscricao realizada com sucesso. A sua conta sera analisada pela administracao. Assim que for aprovada, recebera uma notificacao e podera usufruir dos nossos servicos.');
         } catch (\Exception $e) {
             DB::rollback();
 
@@ -151,23 +146,26 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return back()->withErrors(['email' => 'Credenciais inválidas']);
+            return back()->withErrors(['email' => 'Credenciais invalidas']);
         }
 
-        // 🔒 BLOQUEIO ESTUDANTE INATIVO
-        if ($user->tipo === 'estudante') {
-
-            $estudante = $user->pessoa?->estudante;
-
-            if (!$estudante || $estudante->status !== 'ativo') {
-                return back()->with('error', 'Conta ainda não ativada pelo administrador.');
-            }
-        }
-
-        // LOGIN
         if (Auth::attempt($credentials)) {
-
             $request->session()->regenerate();
+
+            if ($user->tipo === 'estudante') {
+                $estudante = $user->pessoa?->estudante;
+
+                if (!$estudante || $estudante->status !== 'ativo') {
+                    Auth::logout();
+
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    return redirect()->route('login')
+                        ->withInput($request->only('email'))
+                        ->with('error', 'a sua conta ainda nao foi verificada, aguardando o admin, recebera uma notificao quando estiver activa');
+                }
+            }
 
             return match ($user->tipo) {
                 'admin' => redirect()->route('admin.dashboard'),
@@ -178,7 +176,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Credenciais inválidas'
+            'email' => 'Credenciais invalidas'
         ]);
     }
 
