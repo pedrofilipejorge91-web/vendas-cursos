@@ -9,6 +9,7 @@ use App\Models\Aula;
 use App\Models\Avaliacao;
 use App\Models\Formador;
 use App\Models\Matricula;
+use Illuminate\Support\Facades\File;
 
 
 class HomeController extends Controller
@@ -44,7 +45,9 @@ class HomeController extends Controller
             'avaliacao' => round((float) Avaliacao::avg('nota'), 1),
         ];
 
-        return view('home.welcome', compact('cursosDestaque', 'categorias', 'formadores', 'metricas'));
+        $galeriaImagens = $this->galeriaImagens();
+
+        return view('home.welcome', compact('cursosDestaque', 'categorias', 'formadores', 'metricas', 'galeriaImagens'));
     }
 
     public function catalogo(Request $request)
@@ -109,5 +112,30 @@ class HomeController extends Controller
         return view('home.detalhe', compact('cursos','aulas', 'minhaMatricula', 'minhaAvaliacao'));
 
 
+    }
+
+    private function galeriaImagens()
+    {
+        $publicPath = public_path();
+        $extensoes = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'];
+
+        if (! File::isDirectory($publicPath)) {
+            return collect();
+        }
+
+        return collect(File::allFiles($publicPath))
+            ->filter(fn ($file) => in_array(strtolower($file->getExtension()), $extensoes, true))
+            ->map(function ($file) use ($publicPath) {
+                $relativePath = str_replace('\\', '/', $file->getPathname());
+                $relativePath = ltrim(str_replace(str_replace('\\', '/', $publicPath), '', $relativePath), '/');
+                $titulo = str($file->getFilenameWithoutExtension())->replace(['-', '_'], ' ')->title();
+
+                return [
+                    'src' => asset($relativePath),
+                    'title' => $titulo,
+                    'copy' => 'Imagem da galeria Paruana Comercial',
+                ];
+            })
+            ->values();
     }
 }

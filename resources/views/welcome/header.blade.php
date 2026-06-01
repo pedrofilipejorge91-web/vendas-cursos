@@ -26,17 +26,17 @@
                         ? 'admin.dashboard'
                         : (Auth::user()->tipo === 'formador' ? 'formador.dashboard' : 'dashboard');
                 @endphp
-                <a href="{{ route($dashboardRoute) }}" class="btn-nav btn-nav-outline">Dashboard</a>
+                <a href="{{ route($dashboardRoute) }}" class="btn-nav btn-nav-primary">Dashboard</a>
+            @else
+                <a href="{{ route('login') }}" class="btn-nav btn-nav-outline">
+                    <i class="bi bi-person"></i>
+                    Login
+                </a>
+
+                @if (Route::has('register'))
+                    <a href="{{ route('register') }}" class="btn-nav btn-nav-primary">Inscrever-se</a>
+                @endif
             @endauth
-
-            <a href="{{ route('login') }}" class="btn-nav btn-nav-outline">
-                <i class="bi bi-person"></i>
-                Login
-            </a>
-
-            @if (Route::has('register'))
-                <a href="{{ route('register') }}" class="btn-nav btn-nav-primary">Inscrever-se</a>
-            @endif
         </div>
     </div>
 </header>

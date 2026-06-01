@@ -5,12 +5,16 @@
     $heroCurso = $cursosDestaque->first();
     $heroImagem = $heroCurso?->foto ? Storage::url($heroCurso->foto) : asset('assets/img/logo.png');
     $formatarNumero = fn ($valor) => $valor > 999 ? number_format($valor / 1000, 1, ',', '.') . 'k+' : $valor;
-    $paruanaImages = [
-        ['src' => asset('assets/img/paruana/electricidade-alunos-paruana.png'), 'title' => 'Electricidade pratica', 'copy' => 'Alunos aplicam energia, tecnologia e instalacao em projectos reais'],
-        ['src' => asset('assets/img/paruana/decoracao-alunas-paruana.png'), 'title' => 'Decoracao e criatividade', 'copy' => 'Formacao profissional com producao manual e acompanhamento'],
-        ['src' => asset('assets/img/paruana/atendimento-tecnico-paruana.png'), 'title' => 'Orientacao e suporte', 'copy' => 'Atendimento preparado para guiar o aluno em cada etapa'],
-        ['src' => asset('assets/img/paruana/director-paruana.png'), 'title' => 'Lideranca Paruana', 'copy' => 'Uma equipa comprometida com educacao, disciplina e resultados'],
-    ];
+    $dashboardRoute = Auth::check()
+        ? (Auth::user()->tipo === 'admin'
+            ? 'admin.dashboard'
+            : (Auth::user()->tipo === 'formador' ? 'formador.dashboard' : 'dashboard'))
+        : null;
+    $paruanaImages = $galeriaImagens->isNotEmpty()
+        ? $galeriaImagens
+        : collect([
+            ['src' => asset('assets/img/logo.png'), 'title' => 'Paruana Comercial', 'copy' => 'Imagem da galeria Paruana Comercial'],
+        ]);
 
     $servicos = $categorias->map(function ($categoria) {
         return [
@@ -37,7 +41,7 @@
     ];
 @endphp
 
-<section id="inicio" class="hero-section" style="--hero-bg: url('{{ asset('assets/img/paruana/electricidade-alunos-paruana.png') }}')">
+<section id="inicio" class="hero-section" style="--hero-bg: url('{{ asset('assets/img/paruana/hero-paruan.jpg') }}')">
     <div class="hero-visual" aria-hidden="true">
         <div class="hero-grid-lines"></div>
         <div class="chart chart-one"></div>
@@ -54,9 +58,13 @@
         <h1>Formação profissional para transformar a sua carreira.</h1>
         <p class="hero-copy">Cursos praticos, formadores experientes, acompanhamento e certificado para alunos e empresas em Angola.</p>
         <div class="hero-actions">
-            <a href="{{ route('register') }}" class="btn-hero-primary">Inscrever-se</a>
-            <a href="{{ route('login') }}" class="btn-hero-secondary">Login</a>
-            <a href="{{ route('home.catalogo') }}" class="btn-hero-secondary">Ver cursos</a>
+            @auth
+                <a href="{{ route($dashboardRoute) }}" class="btn-hero-primary">Dashboard</a>
+            @else
+                <a href="{{ route('register') }}" class="btn-hero-primary">Inscrever-se</a>
+                <a href="{{ route('login') }}" class="btn-hero-secondary">Login</a>
+                <a href="{{ route('home.catalogo') }}" class="btn-hero-secondary">Ver cursos</a>
+            @endauth
         </div>
     </div>
 </section>
@@ -65,7 +73,7 @@
     <div class="site-container about-grid">
         <div class="about-media">
             <div class="about-image-card photo">
-                <img src="{{ asset('assets/img/paruana/decoracao-alunas-paruana.png') }}" alt="Alunas em formacao pratica de decoracao">
+                <img src="{{ asset('assets/img/paruana/decoracao-alunas-paruan.png') }}" alt="Alunas em formacao pratica de decoracao">
             </div>
         </div>
         <div class="about-copy">
@@ -199,12 +207,16 @@
 
         <div class="blog-list">
             @foreach(array_slice($blogPosts, 1) as $post)
-                <article class="blog-row">
-                    <img src="{{ $loop->first ? asset('assets/img/paruana/director-paruana.png') : asset('assets/img/paruana/electricidade-alunos-paruana.png') }}" alt="{{ $post['titulo'] }}">
-                    <span>{{ $post['tag'] }} - {{ $post['data'] }}</span>
-                    <h3>{{ $post['titulo'] }}</h3>
-                    <p>{{ $post['texto'] }}</p>
-                    <a href="#">Visitar pagina <i class="bi bi-arrow-right"></i></a>
+                <article class="blog-row {{ $loop->first ? 'director-post' : '' }}">
+                    <div class="blog-row-media">
+                        <img src="{{ $loop->first ? asset('assets/img/paruana/director-paruan.png') : asset('assets/img/paruana/electricidade-alunos-paruana.png') }}" alt="{{ $post['titulo'] }}">
+                    </div>
+                    <div class="blog-row-content">
+                        <span>{{ $post['tag'] }} - {{ $post['data'] }}</span>
+                        <h3>{{ $post['titulo'] }}</h3>
+                        <p>{{ $post['texto'] }}</p>
+                        <a href="#">Visitar pagina <i class="bi bi-arrow-right"></i></a>
+                    </div>
                 </article>
             @endforeach
         </div>

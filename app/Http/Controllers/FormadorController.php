@@ -9,6 +9,7 @@ use App\Services\NotificacaoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class FormadorController extends Controller
 {
@@ -32,25 +33,29 @@ class FormadorController extends Controller
         $request->validate([
             // USER
             'name' => 'required',
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
 
             // PESSOA
             'primeironome' => 'required',
             'segundonome' => 'required',
-            'BI' => 'required',
+            'BI' => 'required|unique:pessoas,BI',
             'genero' => 'required',
             'nacionalidade' => 'required',
             'data_nascimento' => 'required',
             'rua' => 'required',
             'bairro' => 'required',
-            'contacto' => 'required',
+            'contacto' => 'required|unique:pessoas,contacto',
 
             // FORMADOR
             'especialidade' => 'required',
             'foto_perfil' => 'nullable|image|max:2048',
             'biografia' => 'nullable',
             'anos_experiencia' => 'required',
+        ], [
+            'email.unique' => 'O email inserido ja existe.',
+            'BI.unique' => 'O B.I inserido ja existe.',
+            'contacto.unique' => 'O contacto inserido ja existe.',
         ]);
 
         DB::beginTransaction();
@@ -149,17 +154,26 @@ class FormadorController extends Controller
     $request->validate([
             'primeironome' => 'required',
             'segundonome' => 'required',
-            'BI' => 'required',
+            'BI' => [
+                'required',
+                Rule::unique('pessoas', 'BI')->ignore($formador->pessoa?->id),
+            ],
             'genero' => 'required',
             'nacionalidade' => 'required',
             'data_nascimento' => 'required',
             'rua' => 'required',
             'bairro' => 'required',
-            'contacto' => 'required',
+            'contacto' => [
+                'required',
+                Rule::unique('pessoas', 'contacto')->ignore($formador->pessoa?->id),
+            ],
             'especialidade' => 'required',
             'foto_perfil' => 'nullable|image|max:2048',
             'biografia' => 'nullable',
             'anos_experiencia' => 'required',
+        ], [
+            'BI.unique' => 'O B.I inserido ja existe.',
+            'contacto.unique' => 'O contacto inserido ja existe.',
         ]);
 
         // PESSOA

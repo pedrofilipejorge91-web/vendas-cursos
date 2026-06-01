@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Categoria;
 use App\Models\Formador;
 use App\Models\Curso;
+use App\Models\Matricula;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
@@ -199,7 +200,17 @@ public function inscrever($id)
             'Apenas estudantes podem inscrever-se.');
     }
 
-    $estudante = $user->pessoa->estudante;
+    $estudante = $user->pessoa?->estudante;
+
+    if (! $estudante) {
+        return back()->with('error',
+            'Apenas estudantes podem inscrever-se.');
+    }
+
+    if (Matricula::where('user_id', $user->id)->where('curso_id', $curso->id)->exists()) {
+        return back()->with('error',
+            'Ja esta inscrito neste curso.');
+    }
 
     // EVITAR DUPLICAÇÃO
     if ($estudante->cursos()
@@ -216,6 +227,13 @@ public function inscrever($id)
         'status' => 'activo',
         'data_inscricao' => now(),
 
+    ]);
+
+    Matricula::firstOrCreate([
+        'user_id' => $user->id,
+        'curso_id' => $curso->id,
+    ], [
+        'progresso' => 0,
     ]);
 
     return back()->with('success',

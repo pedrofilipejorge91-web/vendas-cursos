@@ -8,6 +8,7 @@ use App\Models\Estudante;
 use App\Services\NotificacaoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class EstudanteController extends Controller
 {
@@ -24,20 +25,24 @@ class EstudanteController extends Controller
 {
     $request->validate([
         'name' => 'required',
-        'email' => 'required|email|unique:users',
+        'email' => 'required|email|unique:users,email',
         'password' => 'required|min:6',
 
         'primeironome' => 'required',
         'segundonome' => 'required',
-        'BI' => 'required',
+        'BI' => 'required|unique:pessoas,BI',
         'genero' => 'required',
         'nacionalidade' => 'required',
         'data_nascimento' => 'required',
         'rua' => 'required',
         'bairro' => 'required',
-        'contacto' => 'required',
+        'contacto' => 'required|unique:pessoas,contacto',
 
         'escola_actual' => 'nullable|string',
+    ], [
+        'email.unique' => 'O email inserido ja existe.',
+        'BI.unique' => 'O B.I inserido ja existe.',
+        'contacto.unique' => 'O contacto inserido ja existe.',
     ]);
 
     DB::beginTransaction();
@@ -129,15 +134,24 @@ class EstudanteController extends Controller
         $request->validate([
             'primeironome' => 'required',
             'segundonome' => 'required',
-            'BI' => 'required',
+            'BI' => [
+                'required',
+                Rule::unique('pessoas', 'BI')->ignore($estudante->pessoa?->id),
+            ],
             'genero' => 'required',
             'nacionalidade' => 'required',
             'data_nascimento' => 'required',
             'rua' => 'required',
             'bairro' => 'required',
-            'contacto' => 'required',
+            'contacto' => [
+                'required',
+                Rule::unique('pessoas', 'contacto')->ignore($estudante->pessoa?->id),
+            ],
             'escola_actual' => 'nullable|string',
             'status' => 'required|in:ativo,inativo',
+        ], [
+            'BI.unique' => 'O B.I inserido ja existe.',
+            'contacto.unique' => 'O contacto inserido ja existe.',
         ]);
 
         // PESSOA

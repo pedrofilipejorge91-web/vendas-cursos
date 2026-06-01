@@ -2,7 +2,7 @@
   <div class="student-header-brand d-flex align-items-center justify-content-between">
     <a href="{{ route('dashboard') }}" class="logo student-logo d-flex align-items-center">
       <img src="{{ asset('assets/img/logo.png') }}" alt="Paruana Comercial">
-      <span class="d-none d-lg-block">Paruana</span>
+      <span class="d-none d-lg-block">Paruana comercial</span>
     </a>
     <i class="bi bi-list toggle-sidebar-btn"></i>
   </div>
