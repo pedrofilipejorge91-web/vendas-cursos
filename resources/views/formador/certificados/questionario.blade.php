@@ -61,7 +61,7 @@
                 <div class="card-body p-4">
                     <h4 class="mb-2">Prova do certificado</h4>
                     <p class="text-muted mb-3">
-                        {{ $solicitacao->matricula?->user?->name ?? '-' }} -
+                        {{ $solicitacao->matricula?->user?->nome_completo ?? '-' }} -
                         {{ $solicitacao->curso?->titulo ?? '-' }}
                     </p>
                     <span class="badge bg-{{ $solicitacao->statusBadge() }}">{{ $solicitacao->statusLabel() }}</span>

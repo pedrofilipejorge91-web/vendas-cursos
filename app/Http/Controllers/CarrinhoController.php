@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Curso;
+use App\Models\Matricula;
+use App\Models\Pedido;
 use Illuminate\Http\Request;
 
 class CarrinhoController extends Controller
@@ -13,6 +15,7 @@ class CarrinhoController extends Controller
     public function index()
     {
         $carrinho = session()->get('carrinho', []);
+        $carrinho = $this->removerCursosJaComprados($carrinho);
         $total = $this->calcularTotal($carrinho);
 
         return view('home.carrinho', compact('carrinho', 'total'));
@@ -28,6 +31,13 @@ class CarrinhoController extends Controller
         ]);
 
         $curso = Curso::findOrFail($request->curso_id);
+
+        if ($this->cursoJaCompradoOuPendente($request->user()->id, $curso->id)) {
+            return redirect()
+                ->route('home.carrinho')
+                ->withErrors(['curso' => 'Este curso ja foi comprado ou ja tem um pedido pendente.']);
+        }
+
         $adicionado = $this->adicionarCurso($curso);
 
         return redirect()
@@ -45,6 +55,11 @@ class CarrinhoController extends Controller
         ]);
 
         $curso = Curso::findOrFail($request->curso_id);
+
+        if ($this->cursoJaCompradoOuPendente($request->user()->id, $curso->id)) {
+            return back()->withErrors(['curso' => 'Este curso ja foi comprado ou ja tem um pedido pendente.']);
+        }
+
         $this->adicionarCurso($curso);
 
         return redirect()->route('pagamento');
@@ -103,6 +118,39 @@ class CarrinhoController extends Controller
         session()->put('carrinho', $carrinho);
 
         return true;
+    }
+
+    private function removerCursosJaComprados(array $carrinho): array
+    {
+        $userId = auth()->id();
+
+        if (! $userId || empty($carrinho)) {
+            return $carrinho;
+        }
+
+        foreach (array_keys($carrinho) as $cursoId) {
+            if ($this->cursoJaCompradoOuPendente($userId, (int) $cursoId)) {
+                unset($carrinho[$cursoId]);
+            }
+        }
+
+        session()->put('carrinho', $carrinho);
+
+        return $carrinho;
+    }
+
+    private function cursoJaCompradoOuPendente(int $userId, int $cursoId): bool
+    {
+        if (Matricula::where('user_id', $userId)->where('curso_id', $cursoId)->exists()) {
+            return true;
+        }
+
+        return Pedido::where('user_id', $userId)
+            ->whereIn('status', ['pendente', 'pago'])
+            ->whereHas('itens', function ($query) use ($cursoId) {
+                $query->where('curso_id', $cursoId);
+            })
+            ->exists();
     }
 
     private function calcularTotal(array $carrinho): float

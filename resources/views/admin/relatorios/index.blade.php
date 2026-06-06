@@ -121,9 +121,9 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar-sm-text bg-secondary bg-opacity-10 text-secondary rounded-circle me-2">
-                                                    {{ strtoupper(substr($pedido->user->name, 0, 1)) }}
+                                                    {{ $pedido->user->inicial_nome }}
                                                 </div>
-                                                <span class="small">{{ $pedido->user->name }}</span>
+                                                <span class="small">{{ $pedido->user->nome_completo }}</span>
                                             </div>
                                         </td>
                                         <td><span class="text-dark fw-semibold">{{ number_format($pedido->total, 2, ',', '.') }} Kz</span></td>

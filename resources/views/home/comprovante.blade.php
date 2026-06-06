@@ -29,7 +29,7 @@
             <div class="receipt-grid">
                 <div>
                     <h2>Dados do aluno</h2>
-                    <p>{{ $pedido->user->name }}</p>
+                    <p>{{ $pedido->user->nome_completo }}</p>
                     <span>{{ $pedido->user->email }}</span>
                 </div>
                 <div>

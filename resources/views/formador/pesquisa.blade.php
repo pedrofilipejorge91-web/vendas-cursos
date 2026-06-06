@@ -43,7 +43,7 @@
         @forelse($certificados as $solicitacao)
             <a class="action-item" href="{{ route('formador.certificados.questionario', $solicitacao) }}">
                 <i class="bi bi-award"></i>
-                <div><strong>{{ $solicitacao->matricula?->user?->name ?? 'Aluno' }}</strong><span>{{ $solicitacao->curso?->titulo }} · {{ $solicitacao->statusLabel() }}</span></div>
+                <div><strong>{{ $solicitacao->matricula?->user?->nome_completo ?? 'Aluno' }}</strong><span>{{ $solicitacao->curso?->titulo }} · {{ $solicitacao->statusLabel() }}</span></div>
             </a>
         @empty
             <p class="text-muted mb-0">Nenhuma solicitação encontrada.</p>

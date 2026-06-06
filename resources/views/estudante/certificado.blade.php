@@ -7,7 +7,7 @@
             <p class="text-uppercase text-muted fw-bold">Certificado digital</p>
             <h1 class="fw-bold mb-3">Centro de Formação Paruana Comercial</h1>
             <p class="lead">Certificamos que</p>
-            <h2 class="fw-bold text-primary">{{ $matricula->user->name }}</h2>
+            <h2 class="fw-bold text-primary">{{ $matricula->user->nome_completo }}</h2>
             <p class="lead mt-3">concluiu com aproveitamento o curso</p>
             <h3 class="fw-bold">{{ $matricula->curso->titulo }}</h3>
             <p class="text-muted mt-4">Emitido em {{ $certificado->emitido_em?->format('d/m/Y') ?? now()->format('d/m/Y') }}</p>

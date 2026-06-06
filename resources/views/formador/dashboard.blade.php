@@ -12,7 +12,7 @@
     <section class="formador-hero">
         <div class="formador-hero-copy">
             <span class="eyebrow">Painel do Formador</span>
-            <h1>Olá, {{ auth()->user()->name }}</h1>
+            <h1>Olá, {{ auth()->user()->nome_completo }}</h1>
             <p>Gerencie cursos, aulas, certificados e acompanhe a evolução dos seus alunos num espaço mais claro e produtivo.</p>
             <div class="hero-actions">
                 <a href="{{ route('formador.cursos') }}" class="btn btn-light btn-lg">

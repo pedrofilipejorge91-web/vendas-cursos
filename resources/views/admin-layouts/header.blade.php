@@ -64,14 +64,14 @@
       <li class="nav-item dropdown pe-3">
         <button class="nav-link nav-profile d-flex align-items-center pe-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown">
           <span class="rounded-circle d-inline-flex align-items-center justify-content-center bg-primary text-white fw-bold" style="width: 36px; height: 36px;">
-            {{ strtoupper(Str::substr(Auth::user()->name, 0, 1)) }}
+            {{ Auth::user()->inicial_nome }}
           </span>
-          <span class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->name }}</span>
+          <span class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->nome_completo }}</span>
         </button>
 
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
           <li class="dropdown-header">
-            <h6>{{ Auth::user()->name }}</h6>
+            <h6>{{ Auth::user()->nome_completo }}</h6>
             <span>Administrador</span>
           </li>
           <li><hr class="dropdown-divider"></li>

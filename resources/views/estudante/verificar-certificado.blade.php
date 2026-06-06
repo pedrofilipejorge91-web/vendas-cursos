@@ -11,7 +11,7 @@
             <div class="receipt-grid text-start">
                 <div>
                     <span>Aluno</span>
-                    <h2>{{ $certificado->matricula->user->name }}</h2>
+                    <h2>{{ $certificado->matricula->user->nome_completo }}</h2>
                 </div>
                 <div>
                     <span>Curso</span>

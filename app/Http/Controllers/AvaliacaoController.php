@@ -41,12 +41,12 @@ class AvaliacaoController extends Controller
         app(NotificacaoService::class)->enviar(
             $curso->formador?->pessoa?->user,
             'Novo comentario de aluno',
-            'O aluno '.$user->name.' avaliou o curso '.$curso->titulo.' com '.$avaliacao->nota.'/5 e deixou um comentario.',
+            'O aluno '.$user->nome_completo.' avaliou o curso '.$curso->titulo.' com '.$avaliacao->nota.'/5 e deixou um comentario.',
             ['email'],
             [
                 'linhas' => [
                     'Curso' => $curso->titulo,
-                    'Aluno' => $user->name,
+                    'Aluno' => $user->nome_completo,
                     'Avaliacao' => $avaliacao->nota.'/5',
                 ],
                 'acao_url' => route('formador.comentarios'),

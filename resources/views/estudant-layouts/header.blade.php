@@ -89,13 +89,13 @@
 
       <li class="nav-item dropdown pe-3">
         <button class="nav-link nav-profile d-flex align-items-center pe-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown" aria-label="Menu do aluno">
-          <span class="student-avatar">{{ strtoupper(Str::substr(Auth::user()->name, 0, 1)) }}</span>
-          <span class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->name }}</span>
+          <span class="student-avatar">{{ Auth::user()->inicial_nome }}</span>
+          <span class="d-none d-md-block dropdown-toggle ps-2">{{ Auth::user()->nome_completo }}</span>
         </button>
 
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
           <li class="dropdown-header">
-            <h6>{{ Auth::user()->name }}</h6>
+            <h6>{{ Auth::user()->nome_completo }}</h6>
             <span>Aluno</span>
           </li>
           <li><hr class="dropdown-divider"></li>

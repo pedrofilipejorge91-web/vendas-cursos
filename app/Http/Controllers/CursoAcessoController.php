@@ -176,7 +176,7 @@ class CursoAcessoController extends Controller
             'emitido_em' => now(),
         ]);
 
-        $matricula->load('curso.formador.pessoa', 'curso.aulas', 'user');
+        $matricula->load('curso.formador.pessoa', 'curso.aulas', 'user.pessoa');
 
         return view('estudante.certificado', compact('matricula', 'certificado'));
     }
@@ -200,7 +200,7 @@ class CursoAcessoController extends Controller
         ]);
 
 
-        $matricula->load('curso.formador.pessoa', 'user');
+        $matricula->load('curso.formador.pessoa', 'user.pessoa');
 
         // Generate QR Code
         $verificationUrl = route('certificado.verificar', $certificado->codigo);
@@ -220,7 +220,7 @@ class CursoAcessoController extends Controller
             ],
         ])->setPaper('a4', 'landscape');
 
-        return $pdf->download('certificado-' . Str::slug($matricula->user->name) . '.pdf');
+        return $pdf->download('certificado-' . Str::slug($matricula->user->nome_completo) . '.pdf');
     }
 
     public function downloadAula(Matricula $matricula, Aula $aula)
@@ -241,7 +241,7 @@ class CursoAcessoController extends Controller
 
     public function verificarCertificado(string $codigo)
     {
-        $certificado = Certificado::with('matricula.curso', 'matricula.user')
+        $certificado = Certificado::with('matricula.curso', 'matricula.user.pessoa')
             ->where('codigo', $codigo)
             ->firstOrFail();
 
@@ -298,7 +298,7 @@ class CursoAcessoController extends Controller
                     ['email', 'sms', 'whatsapp'],
                     [
                         'linhas' => [
-                            'Aluno' => $matricula->user?->name ?? '-',
+                            'Aluno' => $matricula->user?->nome_completo ?? '-',
                             'Curso' => $matricula->curso?->titulo ?? '-',
                             'Progresso' => '100%',
                         ],

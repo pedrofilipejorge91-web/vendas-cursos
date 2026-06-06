@@ -2,7 +2,7 @@
 <html lang="pt-AO">
 <head>
     <meta charset="UTF-8">
-    <title>Certificado - {{ $matricula->user->name }}</title>
+    <title>Certificado - {{ $matricula->user->nome_completo }}</title>
     <style>
         @page { margin: 18mm; }
         * { box-sizing: border-box; }
@@ -258,7 +258,7 @@
 
         <div class="certificate-text">
             O centro de formação profissional <strong>PARUANA</strong> certifica que
-            <span class="student">{{ $matricula->user->name }}</span>, concluiu com aproveitamento o curso de
+            <span class="student">{{ $matricula->user->nome_completo }}</span>, concluiu com aproveitamento o curso de
             <span class="course">{{ $matricula->curso->titulo }}</span>, monitorizado por este centro de formação profissional
             que decorreu no período de {{ $inicioCurso }} à {{ $fimCurso }} com a duração de {{ $duracao }} horas,
             tendo obtido uma classificação final de {{ $nota }} valores, numa escala de 0 à 20.

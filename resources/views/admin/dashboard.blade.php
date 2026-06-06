@@ -177,7 +177,7 @@
                             @forelse($recentPedidos as $pedido)
                                 <tr>
                                     <th>{{ $pedido->referencia }}</th>
-                                    <td>{{ $pedido->user->name ?? 'Cliente' }}</td>
+                                    <td>{{ $pedido->user->nome_completo ?? 'Cliente' }}</td>
                                     <td>{{ $pedido->itens->count() }} item(ns)</td>
                                     <td>{{ number_format($pedido->total, 2, ',', '.') }} Kz</td>
                                     <td>

@@ -24,9 +24,9 @@
                         <tbody>
                             @foreach($solicitacoes as $solicitacao)
                                 <tr>
-                                    <td>{{ $solicitacao->matricula?->user?->name ?? '-' }}</td>
+                                    <td>{{ $solicitacao->matricula?->user?->nome_completo ?? '-' }}</td>
                                     <td>{{ $solicitacao->matricula?->curso?->titulo ?? '-' }}</td>
-                                    <td>{{ $solicitacao->instrutor?->pessoa?->user?->name ?? '-' }}</td>
+                                    <td>{{ $solicitacao->instrutor?->pessoa?->user?->nome_completo ?? '-' }}</td>
                                     <td>
                                         <span class="badge bg-{{ $solicitacao->statusBadge() }}">
                                             {{ $solicitacao->statusLabel() }}

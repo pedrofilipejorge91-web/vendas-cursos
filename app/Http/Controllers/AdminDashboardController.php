@@ -100,11 +100,11 @@ class AdminDashboardController extends Controller
                 'texto' => 'Pedido '.$pedido->referencia.' '.$this->statusPedidoLabel($pedido->status),
                 'rota' => route('admin.relatorios'),
             ]))
-            ->merge(Matricula::with(['curso', 'user'])->latest()->take(5)->get()->map(fn ($matricula) => [
+            ->merge(Matricula::with(['curso', 'user.pessoa'])->latest()->take(5)->get()->map(fn ($matricula) => [
                 'data' => $matricula->created_at,
                 'icone' => 'bi-mortarboard',
                 'cor' => 'primary',
-                'texto' => ($matricula->user->name ?? 'Aluno').' iniciou '.($matricula->curso->titulo ?? 'um curso'),
+                'texto' => ($matricula->user->nome_completo ?? 'Aluno').' iniciou '.($matricula->curso->titulo ?? 'um curso'),
                 'rota' => route('estudante.index'),
             ]))
             ->sortByDesc('data')

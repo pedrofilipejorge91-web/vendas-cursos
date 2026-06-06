@@ -31,10 +31,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    'fasmapay' => [
-        'key' => env('FASMAPAY_API_KEY'),
-        'endpoint' => env('FASMAPAY_ENDPOINT'),
-        'timeout' => env('FASMAPAY_TIMEOUT', 30),
+    'sudopay' => [
+        'key' => env('SUDOPAY_API_KEY'),
+        'endpoint' => env('SUDOPAY_ENDPOINT', 'https://comprovativos.sudomakes.com/validar/'),
+        'timeout' => env('SUDOPAY_TIMEOUT', 30),
     ],
 
 ];

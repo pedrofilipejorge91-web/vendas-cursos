@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Matricula;
 use App\Models\Pagamento;
 use App\Models\Pedido;
-use App\Services\FasmaPayService;
 use App\Services\NotificacaoService;
 use App\Services\PagamentoGatewayService;
+use App\Services\SudoPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +25,22 @@ class PagamentoController extends Controller
                 ->withErrors(['carrinho' => 'Adicione pelo menos um curso antes de finalizar a compra.']);
         }
 
+        $cursosIndisponiveis = $this->cursosJaCompradosOuPendentes(array_keys($carrinho));
+
+        if (! empty($cursosIndisponiveis)) {
+            foreach ($cursosIndisponiveis as $cursoId) {
+                unset($carrinho[$cursoId]);
+            }
+
+            session()->put('carrinho', $carrinho);
+
+            if (empty($carrinho)) {
+                return redirect()
+                    ->route('home.carrinho')
+                    ->withErrors(['carrinho' => 'Os cursos no carrinho ja foram comprados ou ja tem pedido pendente.']);
+            }
+        }
+
         [$subtotal, $desconto, $total] = $this->calcularTotais($carrinho);
         $metodos = app(PagamentoGatewayService::class)->metodosDisponiveis();
 
@@ -36,11 +52,11 @@ class PagamentoController extends Controller
         $request->validate([
            'metodo_pagamento' => 'required|in:multicaixa_express,transferencia_bancaria',
             'telefone' => 'nullable|string|max:30',
-            'comprovativo' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
+            'comprovativo' => 'nullable|file|mimes:pdf|max:4096',
         ]);
 
 
-      $carrinho = session()->get('carrinho', []);
+$carrinho = session()->get('carrinho', []);
 
 if (empty($carrinho)) {
     return redirect()
@@ -48,12 +64,26 @@ if (empty($carrinho)) {
         ->withErrors(['carrinho' => 'O carrinho esta vazio.']);
 }
 
+$cursosIndisponiveis = $this->cursosJaCompradosOuPendentes(array_keys($carrinho));
+
+if (! empty($cursosIndisponiveis)) {
+    foreach ($cursosIndisponiveis as $cursoId) {
+        unset($carrinho[$cursoId]);
+    }
+
+    session()->put('carrinho', $carrinho);
+
+    return redirect()
+        ->route('home.carrinho')
+        ->withErrors(['carrinho' => 'Removemos do carrinho cursos que ja foram comprados ou que ja tem pedido pendente.']);
+}
+
 $gatewayPayload = null;
 $pagamentoConfirmado = false;
 
 if ($request->hasFile('comprovativo')) {
 
-    $validacao = app(FasmaPayService::class)
+    $validacao = app(SudoPayService::class)
         ->validarComprovativo($request->file('comprovativo'));
 
     $gatewayPayload = $validacao['response'];
@@ -111,7 +141,7 @@ $comprovativoPath = $request->hasFile('comprovativo')
 
             return redirect()
                 ->route('pagamento.comprovante', $pedido)
-                ->with('success', 'Comprovativo validado pela FasmaPay. Pagamento confirmado e acesso liberado.');
+                ->with('success', 'Comprovativo validado pela SudoPay. Pagamento confirmado e acesso liberado.');
         }
 
         app(NotificacaoService::class)->enviar(
@@ -205,6 +235,39 @@ $comprovativoPath = $request->hasFile('comprovativo')
         $total = $subtotal;
 
         return [$subtotal, $desconto, $total];
+    }
+
+    private function cursosJaCompradosOuPendentes(array $cursoIds): array
+    {
+        $cursoIds = collect($cursoIds)->map(fn ($cursoId) => (int) $cursoId)->filter()->values();
+
+        if ($cursoIds->isEmpty()) {
+            return [];
+        }
+
+        $matriculados = Matricula::where('user_id', Auth::id())
+            ->whereIn('curso_id', $cursoIds)
+            ->pluck('curso_id');
+
+        $emPedidosAtivos = Pedido::where('user_id', Auth::id())
+            ->whereIn('status', ['pendente', 'pago'])
+            ->whereHas('itens', function ($query) use ($cursoIds) {
+                $query->whereIn('curso_id', $cursoIds);
+            })
+            ->with(['itens' => function ($query) use ($cursoIds) {
+                $query->whereIn('curso_id', $cursoIds);
+            }])
+            ->get()
+            ->pluck('itens')
+            ->flatten()
+            ->pluck('curso_id');
+
+        return $matriculados
+            ->merge($emPedidosAtivos)
+            ->unique()
+            ->map(fn ($cursoId) => (int) $cursoId)
+            ->values()
+            ->all();
     }
 
     private function gerarReferencia(string $prefixo): string

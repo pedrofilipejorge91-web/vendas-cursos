@@ -53,20 +53,26 @@
                 <img src="{{ $courseImage }}" class="card-img-top" alt="{{ $cursos->titulo }}">
                 <div class="card-body">
                     <h3 class="fw-bold text-primary mb-3">{{ number_format($cursos->preco, 2, ',', '.') }} Kz</h3>
-                    <form action="{{ route('carrinho.add') }}" method="POST" class="mb-2">
-                        @csrf
-                        <input type="hidden" name="curso_id" value="{{ $cursos->id }}">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-cart-plus me-1"></i> Adicionar ao carrinho
-                        </button>
-                    </form>
-                    <form action="{{ route('carrinho.buy-now') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="curso_id" value="{{ $cursos->id }}">
-                        <button type="submit" class="btn btn-outline-primary w-100">
-                            Comprar agora
-                        </button>
-                    </form>
+                    @if(isset($minhaMatricula) && $minhaMatricula)
+                        <a href="{{ route('estudante.curso', $minhaMatricula) }}" class="btn btn-primary w-100">
+                            Acessar curso
+                        </a>
+                    @else
+                        <form action="{{ route('carrinho.add') }}" method="POST" class="mb-2">
+                            @csrf
+                            <input type="hidden" name="curso_id" value="{{ $cursos->id }}">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-cart-plus me-1"></i> Adicionar ao carrinho
+                            </button>
+                        </form>
+                        <form action="{{ route('carrinho.buy-now') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="curso_id" value="{{ $cursos->id }}">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                Comprar agora
+                            </button>
+                        </form>
+                    @endif
                     <ul class="list-unstyled text-muted small mt-4 mb-0">
                         <li class="mb-2"><i class="bi bi-check2-circle text-success me-1"></i> Acesso ao conteúdo</li>
                         <li class="mb-2"><i class="bi bi-check2-circle text-success me-1"></i> Certificado após aprovação</li>

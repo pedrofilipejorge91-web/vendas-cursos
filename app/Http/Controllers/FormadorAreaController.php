@@ -179,7 +179,7 @@ class FormadorAreaController extends Controller
                 'user_id' => $admin->id,
                 'canal' => 'sistema',
                 'titulo' => 'Pedido de suporte do formador',
-                'mensagem' => $formador->name.' enviou: '.$validated['assunto'].' - '.$validated['mensagem'],
+                'mensagem' => $formador->nome_completo.' enviou: '.$validated['assunto'].' - '.$validated['mensagem'],
             ]);
         }
 

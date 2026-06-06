@@ -102,11 +102,11 @@ class AuthController extends Controller
                 $notificador->enviar(
                     $admin,
                     'Nova conta de aluno aguardando activacao',
-                    'O aluno '.$user->name.' concluiu o cadastro e precisa de activacao para aceder a plataforma.',
+                    'O aluno '.$user->nome_completo.' concluiu o cadastro e precisa de activacao para aceder a plataforma.',
                     ['email'],
                     [
                         'linhas' => [
-                            'Aluno' => $user->name,
+                            'Aluno' => $user->nome_completo,
                             'Email' => $user->email,
                         ],
                         'acao_url' => route('estudante.index'),

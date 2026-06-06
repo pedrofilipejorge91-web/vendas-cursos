@@ -1,5 +1,5 @@
 @php
-    $nome = $user?->pessoa?->primeironome ?? $user?->name ?? 'utilizador';
+    $nome = $user?->nome_completo ?? 'utilizador';
     $appName = config('app.name', 'Paruana Comercial');
 @endphp
 <!doctype html>

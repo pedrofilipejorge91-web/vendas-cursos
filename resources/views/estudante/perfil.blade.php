@@ -99,9 +99,9 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center gap-3 mb-3">
-                        <span class="student-avatar large">{{ strtoupper(Str::substr($user->name, 0, 1)) }}</span>
+                        <span class="student-avatar large">{{ $user->inicial_nome }}</span>
                         <div>
-                            <h5 class="card-title p-0 mb-1">{{ $user->name }}</h5>
+                            <h5 class="card-title p-0 mb-1">{{ $user->nome_completo }}</h5>
                             <p class="text-muted small mb-0">Perfil de estudante</p>
                         </div>
                     </div>

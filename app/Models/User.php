@@ -38,6 +38,21 @@ class User extends Authenticatable
         return $this->hasOne(Pessoa::class);
     }
 
+    public function getNomeCompletoAttribute(): string
+    {
+        $nomePessoa = trim(collect([
+            $this->pessoa?->primeironome,
+            $this->pessoa?->segundonome,
+        ])->filter()->implode(' '));
+
+        return $nomePessoa !== '' ? $nomePessoa : ($this->name ?? 'Utilizador');
+    }
+
+    public function getInicialNomeAttribute(): string
+    {
+        return strtoupper(substr($this->nome_completo, 0, 1));
+    }
+
     // FORMADOR VIA PESSOA
     public function formador()
     {

@@ -1,8 +1,8 @@
 <aside id="sidebar" class="sidebar student-sidebar">
   <div class="student-sidebar-card">
-    <span class="student-avatar large">{{ strtoupper(Str::substr(Auth::user()->name, 0, 1)) }}</span>
+    <span class="student-avatar large">{{ Auth::user()->inicial_nome }}</span>
     <div>
-      <strong>{{ Auth::user()->name }}</strong>
+      <strong>{{ Auth::user()->nome_completo }}</strong>
       <small>Área do aluno</small>
     </div>
   </div>

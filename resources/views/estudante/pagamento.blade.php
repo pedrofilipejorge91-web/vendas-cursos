@@ -35,8 +35,8 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label">Comprovativo</label>
-                            <input type="file" name="comprovativo" class="form-control" accept="image/*,.pdf">
-                            <div class="form-text">Os comprovativos enviados serão validados automaticamente pelo sistema.</div>
+                            <input type="file" name="comprovativo" class="form-control" accept=".pdf,application/pdf">
+                            <div class="form-text">Envie o comprovativo em PDF para validacao automatica pela SudoPay.</div>
                         </div>
                         <div class="col-12">
                             <button class="btn btn-primary">

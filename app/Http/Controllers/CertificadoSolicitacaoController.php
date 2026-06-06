@@ -23,7 +23,7 @@ class CertificadoSolicitacaoController extends Controller
 
         $solicitacoes = CertificadoSolicitacao::with([
             'matricula.curso',
-            'matricula.user',
+            'matricula.user.pessoa',
             'curso',
             'questionario.respostas.estudante.pessoa.user',
         ])
@@ -42,7 +42,7 @@ class CertificadoSolicitacaoController extends Controller
         $formadorId = $user->pessoa?->formador?->id;
         abort_unless($formadorId && (int) $solicitacao->instrutor_id === (int) $formadorId, 403);
 
-        $solicitacao->load(['matricula.user', 'curso', 'questionario.respostas.estudante.pessoa.user']);
+        $solicitacao->load(['matricula.user.pessoa', 'curso', 'questionario.respostas.estudante.pessoa.user']);
         $questionario = $solicitacao->questionario()->first();
         $resposta = $questionario?->respostas()->with('estudante.pessoa.user')->latest('enviado_em')->first();
 
@@ -232,7 +232,7 @@ class CertificadoSolicitacaoController extends Controller
         $user = Auth::user();
         abort_unless($user && $user->tipo === 'admin', 403);
 
-        $solicitacoes = CertificadoSolicitacao::with(['matricula.curso', 'matricula.user', 'instrutor.pessoa.user'])
+        $solicitacoes = CertificadoSolicitacao::with(['matricula.curso', 'matricula.user.pessoa', 'instrutor.pessoa.user'])
             ->whereIn('status', [
                 CertificadoSolicitacao::STATUS_AGUARDANDO_ADMIN,
                 CertificadoSolicitacao::STATUS_APROVADO,
@@ -316,10 +316,10 @@ class CertificadoSolicitacaoController extends Controller
         $this->notificar(
             $matricula->curso?->formador?->pessoa?->user,
             'Aluno concluiu o curso',
-            'O aluno '.$matricula->user?->name.' concluiu o curso '.$matricula->curso?->titulo.'. Crie a prova para iniciar a liberacao do certificado.',
+            'O aluno '.$matricula->user?->nome_completo.' concluiu o curso '.$matricula->curso?->titulo.'. Crie a prova para iniciar a liberacao do certificado.',
             [
                 'linhas' => [
-                    'Aluno' => $matricula->user?->name ?? '-',
+                    'Aluno' => $matricula->user?->nome_completo ?? '-',
                     'Curso' => $matricula->curso?->titulo ?? '-',
                     'Progresso' => '100%',
                 ],

@@ -23,16 +23,20 @@
                 <img src="{{ $courseImage }}" alt="{{ $cursos->titulo }}" loading="lazy">
             </figure>
             <div class="checkout-price">{{ number_format($cursos->preco, 2, ',', '.') }} Kz</div>
-            <form action="{{ route('carrinho.add') }}" method="POST">
-                @csrf
-                <input type="hidden" name="curso_id" value="{{ $cursos->id }}">
-                <button type="submit" class="btn-full primary">Adicionar ao carrinho</button>
-            </form>
-            <form action="{{ route('carrinho.buy-now') }}" method="POST">
-                @csrf
-                <input type="hidden" name="curso_id" value="{{ $cursos->id }}">
-                <button type="submit" class="btn-full ghost">Comprar agora</button>
-            </form>
+            @if($minhaMatricula)
+                <a href="{{ route('estudante.curso', $minhaMatricula) }}" class="btn-full primary">Acessar curso</a>
+            @else
+                <form action="{{ route('carrinho.add') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="curso_id" value="{{ $cursos->id }}">
+                    <button type="submit" class="btn-full primary">Adicionar ao carrinho</button>
+                </form>
+                <form action="{{ route('carrinho.buy-now') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="curso_id" value="{{ $cursos->id }}">
+                    <button type="submit" class="btn-full ghost">Comprar agora</button>
+                </form>
+            @endif
             <ul>
                 <li><i class="bi bi-check2-circle"></i> Acesso ao conteudo</li>
                 <li><i class="bi bi-check2-circle"></i> Certificado apos aprovacao</li>

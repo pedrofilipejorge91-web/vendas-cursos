@@ -97,11 +97,11 @@
                         <input
                             type="file"
                             name="comprovativo"
-                            accept=".jpg,.jpeg,.png,.pdf"
+                            accept=".pdf,application/pdf"
                         >
 
                         <small>
-                            Formatos aceites: PDF, JPG ou PNG (Máximo 4MB).
+                            Formato aceite: PDF (Maximo 4MB).
                         </small>
 
                     </div>
@@ -110,7 +110,7 @@
                         <strong>Validação Automática</strong>
 
                         <p>
-                            Após o envio do comprovativo, o sistema verifica
+                            Após o envio do comprovativo em PDF, o sistema verifica
                             automaticamente os dados da transferência antes
                             da liberação do acesso ao curso.
                         </p>

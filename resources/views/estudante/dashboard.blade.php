@@ -19,7 +19,7 @@
                     <div class="row align-items-center g-4">
                         <div class="col-lg-8">
                             <p class="text-uppercase small fw-bold opacity-75 mb-2">Bem-vindo de volta</p>
-                            <h2 class="fw-bold mb-3">{{ Auth::user()->name }}</h2>
+                            <h2 class="fw-bold mb-3">{{ Auth::user()->nome_completo }}</h2>
                             <p class="mb-4 opacity-75">Continue os seus cursos, acompanhe o progresso e emita certificados quando concluir 100% do conteúdo.</p>
                             <a href="{{ route('home.catalogo') }}" class="btn btn-light fw-bold">
                                 <i class="bi bi-search me-1"></i> Procurar novos cursos

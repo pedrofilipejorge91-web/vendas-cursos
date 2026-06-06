@@ -60,7 +60,7 @@
 
                             <tr>
                                 <td>
-                                    {{ $estudante->pessoa->user->name ?? 'N/A' }}
+                                    {{ $estudante->pessoa->user->nome_completo ?? 'N/A' }}
                                 </td>
 
                                 <td>
