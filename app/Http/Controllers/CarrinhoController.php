@@ -18,7 +18,7 @@ class CarrinhoController extends Controller
         $carrinho = $this->removerCursosJaComprados($carrinho);
         $total = $this->calcularTotal($carrinho);
 
-        return view('home.carrinho', compact('carrinho', 'total'));
+        return view('checkout.carrinho', compact('carrinho', 'total'));
     }
 
     /**

@@ -121,14 +121,13 @@
                                                             data-bs-toggle="modal" data-bs-target="#edit-{{$aula->id}}" title="Editar Aula">
                                                         <i class="bi bi-pencil-square"></i>
                                                     </button>
-                                                @endif
-                                                
-                                                <!-- Eliminar -->
 
-                                                <button type="button" class="btn btn-light btn-sm text-danger shadow-sm border" 
-                                                        data-bs-toggle="modal" data-bs-target="#delete-{{$aula->id}}" title="Eliminar Aula">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
+                                                    <!-- Eliminar -->
+                                                    <button type="button" class="btn btn-light btn-sm text-danger shadow-sm border" 
+                                                            data-bs-toggle="modal" data-bs-target="#delete-{{$aula->id}}" title="Eliminar Aula">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -136,8 +135,8 @@
                                     <!-- Modais Organizados -->
                                     @if(Auth::user()?->tipo === 'formador')
                                         @include('admin.aulas.edit')
+                                        @include('admin.aulas.delete')
                                     @endif
-                                    @include('admin.aulas.delete')
 
 
 

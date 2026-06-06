@@ -18,6 +18,7 @@ class SudoPayService
             return [
                 'valid' => false,
                 'message' => 'A chave de acesso da SudoPay ainda nao foi configurada.',
+                'http_status' => null,
                 'response' => null,
             ];
         }
@@ -26,6 +27,7 @@ class SudoPayService
             return [
                 'valid' => false,
                 'message' => 'O endpoint da SudoPay ainda nao foi configurado.',
+                'http_status' => null,
                 'response' => null,
             ];
         }
@@ -57,17 +59,20 @@ class SudoPayService
                 return [
                     'valid' => false,
                     'message' => 'O PDF enviado nao foi reconhecido como comprovativo valido pela SudoPay.',
+                    'http_status' => $response->status(),
                     'response' => null,
                 ];
             }
 
-            $valid = ((int) ($payload['STATUS'] ?? 0) === 200);
+            $valid = $response->successful() && ((int) ($payload['STATUS'] ?? 0) === 200);
+            $message = $valid
+                ? 'Comprovativo validado com sucesso.'
+                : ($payload['LOG'] ?? 'Comprovativo invalido.');
 
             return [
                 'valid' => $valid,
-                'message' => $valid
-                    ? 'Comprovativo validado com sucesso.'
-                    : ($payload['LOG'] ?? 'Comprovativo invalido.'),
+                'message' => $message,
+                'http_status' => $response->status(),
                 'response' => $payload,
             ];
         } catch (\Throwable $e) {
@@ -78,6 +83,7 @@ class SudoPayService
             return [
                 'valid' => false,
                 'message' => 'Nao foi possivel contactar a SudoPay.',
+                'http_status' => null,
                 'response' => [
                     'error' => $e->getMessage(),
                 ],

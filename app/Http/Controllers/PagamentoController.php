@@ -42,17 +42,19 @@ class PagamentoController extends Controller
         }
 
         [$subtotal, $desconto, $total] = $this->calcularTotais($carrinho);
+        $resumoCompra = $this->prepararResumoCompra($carrinho);
         $metodos = app(PagamentoGatewayService::class)->metodosDisponiveis();
 
-        return view('home.pagamento', compact('carrinho', 'subtotal', 'desconto', 'total', 'metodos'));
+        return view('checkout.pagamento', compact('carrinho', 'resumoCompra', 'subtotal', 'desconto', 'total', 'metodos'));
     }
 
     public function processar(Request $request)
     {
+        $metodos = app(PagamentoGatewayService::class)->metodosDisponiveis();
+
         $request->validate([
-           'metodo_pagamento' => 'required|in:multicaixa_express,transferencia_bancaria',
+            'metodo_pagamento' => 'required|in:'.implode(',', array_keys($metodos)),
             'telefone' => 'nullable|string|max:30',
-            'comprovativo' => 'nullable|file|mimes:pdf|max:4096',
         ]);
 
 
@@ -78,29 +80,14 @@ if (! empty($cursosIndisponiveis)) {
         ->withErrors(['carrinho' => 'Removemos do carrinho cursos que ja foram comprados ou que ja tem pedido pendente.']);
 }
 
+[$subtotal, $desconto, $total] = $this->calcularTotais($carrinho);
+
 $gatewayPayload = null;
 $pagamentoConfirmado = false;
-
-if ($request->hasFile('comprovativo')) {
-
-    $validacao = app(SudoPayService::class)
-        ->validarComprovativo($request->file('comprovativo'));
-
-    $gatewayPayload = $validacao['response'];
-
-    if ($validacao['valid']) {
-        $pagamentoConfirmado = true;
-    }
-}
-
-$comprovativoPath = $request->hasFile('comprovativo')
-    ? $request->file('comprovativo')->store('comprovativos', 'public')
-    : null;
+$comprovativoPath = null;
        
 
-        $pedido = DB::transaction(function () use ($request, $carrinho, $comprovativoPath, $gatewayPayload, $pagamentoConfirmado) {
-            [$subtotal, $desconto, $total] = $this->calcularTotais($carrinho);
-
+        $pedido = DB::transaction(function () use ($request, $carrinho, $subtotal, $desconto, $total, $comprovativoPath, $gatewayPayload, $pagamentoConfirmado) {
             $pedido = Pedido::create([
                 'user_id' => Auth::id(),
                 'referencia' => $this->gerarReferencia('PED'),
@@ -172,10 +159,59 @@ $comprovativoPath = $request->hasFile('comprovativo')
         abort_unless($pedido->user_id === Auth::id() || Auth::user()?->tipo === 'admin', 403);
 
         $pedido->load('itens.curso', 'pagamento', 'user');
-        $gatewayUrl = $gatewayService->gerarUrlPagamento($pedido, $pedido->pagamento);
         $gatewayDescription = $gatewayService->obterDescricaoPagamento($pedido, $pedido->pagamento);
 
-        return view('home.comprovante', compact('pedido', 'gatewayUrl', 'gatewayDescription'));
+        return view('checkout.comprovante', compact('pedido', 'gatewayDescription'));
+    }
+
+    public function enviarComprovativo(Request $request, Pedido $pedido)
+    {
+        abort_unless($pedido->user_id === Auth::id(), 403);
+        abort_unless($pedido->status === 'pendente', 403);
+
+        $request->validate([
+            'comprovativo' => 'required|file|mimes:pdf|max:4096',
+        ]);
+
+        $pedido->load('itens', 'pagamento', 'user');
+
+        $validacao = app(SudoPayService::class)
+            ->validarComprovativo($request->file('comprovativo'));
+
+        if (! $validacao['valid']) {
+            return redirect()
+                ->back()
+                ->withErrors(['comprovativo' => $validacao['message']]);
+        }
+
+        $valorPago = $this->valorPagoNoComprovativo($validacao['response']);
+
+        if ($valorPago === null || $valorPago < (float) $pedido->total) {
+            return redirect()
+                ->back()
+                ->withErrors([
+                    'comprovativo' => 'O comprovativo foi reconhecido, mas o valor pago nao cobre o total da compra.',
+                ]);
+        }
+
+        $comprovativoPath = $request->file('comprovativo')->store('comprovativos', 'public');
+
+        DB::transaction(function () use ($pedido, $comprovativoPath, $validacao) {
+            $pedido->update(['status' => 'pago', 'expira_em' => null]);
+
+            $pedido->pagamento?->update([
+                'status' => 'confirmado',
+                'comprovativo' => $comprovativoPath,
+                'gateway_payload' => $validacao['response'],
+                'confirmado_em' => now(),
+            ]);
+
+            $this->liberarMatriculas($pedido);
+        });
+
+        return redirect()
+            ->route('pagamento.comprovante', $pedido)
+            ->with('success', 'Comprovativo validado pela SudoPay. Pagamento confirmado e acesso liberado.');
     }
 
     public function confirmar(Pedido $pedido)
@@ -235,6 +271,35 @@ $comprovativoPath = $request->hasFile('comprovativo')
         $total = $subtotal;
 
         return [$subtotal, $desconto, $total];
+    }
+
+    private function prepararResumoCompra(array $carrinho): array
+    {
+        return collect($carrinho)
+            ->map(function ($item) {
+                $quantidade = (int) ($item['quantidade'] ?? 1);
+                $preco = (float) $item['preco'];
+
+                return [
+                    'titulo' => $item['titulo'],
+                    'preco' => $preco,
+                    'quantidade' => $quantidade,
+                    'total' => $preco * $quantidade,
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    private function valorPagoNoComprovativo(?array $gatewayPayload): ?float
+    {
+        if (! is_array($gatewayPayload) || ! array_key_exists('DINHEIRO', $gatewayPayload)) {
+            return null;
+        }
+
+        return is_numeric($gatewayPayload['DINHEIRO'])
+            ? (float) $gatewayPayload['DINHEIRO']
+            : null;
     }
 
     private function cursosJaCompradosOuPendentes(array $cursoIds): array

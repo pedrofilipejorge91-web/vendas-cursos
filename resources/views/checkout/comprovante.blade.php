@@ -16,13 +16,35 @@
                 </div>
             </header>
 
+            @if($errors->any())
+                <div class="alert-card error">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
+            @if(session('success'))
+                <div class="alert-card success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             @if($gatewayDescription)
                 <div class="info-box">
                     <strong>Instrucoes de pagamento:</strong>
                     <p>{{ $gatewayDescription }}</p>
-                    @if($gatewayUrl)
-                        <a href="{{ $gatewayUrl }}" target="_blank">Ir para o pagamento <i class="bi bi-arrow-right"></i></a>
-                    @endif
+                </div>
+            @endif
+
+            @if($pedido->status === 'pendente' && $pedido->user_id === Auth::id())
+                <div class="receipt-upload">
+                    <h2>Enviar comprovativo</h2>
+                    <p>Depois de pagar pelo Multicaixa Express ou transferencia bancaria, envie o PDF original gerado pelo banco para validacao automatica.</p>
+
+                    <form action="{{ route('pagamento.comprovativo.enviar', $pedido) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <input type="file" name="comprovativo" accept=".pdf,application/pdf" required>
+                        <button type="submit" class="btn-full primary">Validar comprovativo</button>
+                    </form>
                 </div>
             @endif
 
@@ -60,8 +82,10 @@
                 <div><span>Total</span><strong>{{ number_format($pedido->total, 2, ',', '.') }} Kz</strong></div>
             </div>
 
-            <div class="receipt-actions">
-                <a href="{{ route('dashboard') }}" class="btn-full primary">Ir para meus cursos</a>
+            <div class="receipt-actions {{ $pedido->status === 'pago' ? '' : 'single' }}">
+                @if($pedido->status === 'pago')
+                    <a href="{{ route('dashboard') }}" class="btn-full primary">Ir para meus cursos</a>
+                @endif
                 <a href="{{ route('home.catalogo') }}" class="btn-full ghost">Voltar ao catalogo</a>
             </div>
         </article>

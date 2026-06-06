@@ -103,7 +103,9 @@ class EstudanteController extends Controller
 
         DB::rollback();
 
-        dd($e->getMessage()); // 🔥 MUITO IMPORTANTE PARA VER O ERRO REAL
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Erro ao criar estudante: ' . $e->getMessage());
     }
 }
 

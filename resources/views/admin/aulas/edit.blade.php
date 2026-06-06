@@ -17,7 +17,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form action="{{ Auth::user()?->tipo === 'formador' ? route('formador.aulas.update', $aula->id) : route('aulas.update', $aula->id) }}" 
+            <form action="{{ route('formador.aulas.update', $aula->id) }}" 
                   method="POST" 
                   enctype="multipart/form-data"
                   class="needs-validation">

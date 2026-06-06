@@ -83,10 +83,7 @@ Route::put('/admin/Categoria/update/{id}',[CategoriaController::class, 'update']
     Route::post('/admin/cursos/{id}/rejeitar', [CursoController::class, 'rejeitar'])->name('curso.rejeitar');
 
     Route::get('/admin/aulas', [AulaController::class, 'index'])->name('aula.index');
-    Route::post('/admin/aulas', [AulaController::class, 'store'])->name('aula.store');
     Route::get('/admin/aulas/{aula}/show', [AulaController::class, 'show'])->name('aulas.show');
-    Route::put('/admin/aulas/{id}', [AulaController::class, 'update'])->name('aulas.update');
-    Route::delete('/admin/aulas/{id}', [AulaController::class, 'destroy'])->name('aulas.destroy');
 
     
     Route::get('/admin/estudante', [EstudanteController::class, 'index'])->name('estudante.index');
@@ -169,6 +166,7 @@ Route::get('/pagamento', [PagamentoController::class, 'index'])
     ->name('pagamento');
 
 Route::get('/pagamento/comprovante/{pedido}', [PagamentoController::class, 'comprovante'])->name('pagamento.comprovante');
+Route::post('/pagamento/comprovante/{pedido}/comprovativo', [PagamentoController::class, 'enviarComprovativo'])->name('pagamento.comprovativo.enviar');
 Route::post('/pagamento/{pedido}/confirmar', [PagamentoController::class, 'confirmar'])->name('pagamento.confirmar');
 
 // Processar pagamento

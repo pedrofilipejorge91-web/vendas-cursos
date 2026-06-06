@@ -8,7 +8,7 @@
             </div>
             <div class="modal-body">
                 <!-- Floating Labels Form -->
-<form class="row g-3" method="POST" action="{{ Auth::user()?->tipo === 'formador' ? route('formador.aulas.destroy', $aula->id) : route('aulas.destroy', $aula->id) }}" data-ajax-confirm="Tem certeza que deseja eliminar esta aula?">
+<form class="row g-3" method="POST" action="{{ route('formador.aulas.destroy', $aula->id) }}" data-ajax-confirm="Tem certeza que deseja eliminar esta aula?">
                 @csrf
                 @method('DELETE')
               

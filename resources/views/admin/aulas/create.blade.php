@@ -17,7 +17,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form action="{{ Auth::user()?->tipo === 'formador' ? route('formador.aulas.store') : route('aula.store') }}" 
+            <form action="{{ route('formador.aulas.store') }}" 
                   method="POST" 
                   enctype="multipart/form-data" 
                   data-ajax="true" 

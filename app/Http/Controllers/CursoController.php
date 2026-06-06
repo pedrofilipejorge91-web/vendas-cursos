@@ -94,7 +94,7 @@ class CursoController extends Controller
 
         if (auth()->user()?->tipo === 'formador') {
             $dados['formador_id'] = $this->formadorIdAutenticado();
-            $dados['status'] = 'rascunho';
+            $dados['status'] = $curso->status;
         }
 
         if ($request->hasFile('foto')) {

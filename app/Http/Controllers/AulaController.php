@@ -29,6 +29,8 @@ class AulaController extends Controller
 
     public function store(Request $request)
     {
+        $this->autorizarFormador();
+
         $validated = $request->validate([
             'titulo' => 'required|string|max:255',
             'descricao' => 'nullable|string',
@@ -65,6 +67,8 @@ class AulaController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->autorizarFormador();
+
         // Segurança extra: evita requests mal roteados.
         // Aceita PUT/PATCH (override do form) e também POST quando o Laravel injeta o _method.
         // Ex.: se vier como DELETE por engano, aborta.
@@ -116,6 +120,8 @@ class AulaController extends Controller
 
     public function destroy($id)
     {
+        $this->autorizarFormador();
+
         $aula = Aula::with('curso')->findOrFail($id);
         $this->autorizarGestao($aula->curso);
 
@@ -148,6 +154,11 @@ class AulaController extends Controller
         if (auth()->user()?->tipo === 'formador') {
             abort_unless($curso->formador_id === $this->formadorIdAutenticado(), 403);
         }
+    }
+
+    private function autorizarFormador(): void
+    {
+        abort_unless(auth()->user()?->tipo === 'formador', 403);
     }
 
     private function formadorIdAutenticado(): ?int

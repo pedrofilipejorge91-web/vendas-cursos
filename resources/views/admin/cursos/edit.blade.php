@@ -100,11 +100,17 @@
 
                                 <div class="col-md-4">
                                     <label class="form-label small fw-bold">Status do Curso</label>
-                                    <select class="form-select border-0" name="status" required>
-                                        <option value="rascunho" {{ old('status', $curso->status) == 'rascunho' ? 'selected' : '' }}>📝 Rascunho</option>
-                                        <option value="publicado" {{ old('status', $curso->status) == 'publicado' ? 'selected' : '' }}>🚀 Publicado</option>
-                                        <option value="inativo" {{ old('status', $curso->status) == 'inativo' ? 'selected' : '' }}>🔒 Inativo</option>
-                                    </select>
+                                    @if(Auth::user()?->tipo === 'formador')
+                                        <div class="form-control border-0 bg-white text-capitalize">
+                                            {{ str_replace('_', ' ', $curso->status) }}
+                                        </div>
+                                    @else
+                                        <select class="form-select border-0" name="status" required>
+                                            <option value="rascunho" {{ old('status', $curso->status) == 'rascunho' ? 'selected' : '' }}>Rascunho</option>
+                                            <option value="publicado" {{ old('status', $curso->status) == 'publicado' ? 'selected' : '' }}>Publicado</option>
+                                            <option value="inativo" {{ old('status', $curso->status) == 'inativo' ? 'selected' : '' }}>Inativo</option>
+                                        </select>
+                                    @endif
                                 </div>
 
                                 @if(Auth::user()?->tipo !== 'formador')

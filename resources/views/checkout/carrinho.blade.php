@@ -4,7 +4,7 @@
 <section class="page-hero compact">
     <div class="site-container">
         <p class="eyebrow">Compras</p>
-        <h1>Seu carrinho</h1>
+        <h1>Carrinho</h1>
         <p>Revise os cursos selecionados antes de finalizar a inscricao.</p>
     </div>
 </section>

@@ -1686,6 +1686,47 @@ img {
   margin-top: 8px;
 }
 
+.receipt-upload {
+  padding: 22px;
+  margin-top: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.receipt-upload h2 {
+  margin: 0 0 8px;
+  color: var(--blue-900);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.receipt-upload p {
+  margin: 0 0 14px;
+  color: var(--muted);
+}
+
+.receipt-upload form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.receipt-upload input[type="file"] {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.receipt-upload .btn-full {
+  margin-top: 0;
+  padding-inline: 18px;
+}
+
 .receipt-table {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1720,6 +1761,10 @@ img {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+.receipt-actions.single {
+  grid-template-columns: 1fr;
 }
 
 @media (max-width: 980px) {
@@ -1898,6 +1943,10 @@ img {
 
   .receipt-status {
     text-align: left;
+  }
+
+  .receipt-upload form {
+    grid-template-columns: 1fr;
   }
 }
 .team-grid {

@@ -5,7 +5,7 @@
     <div class="site-container">
         <p class="eyebrow">Pagamento</p>
         <h1>Finalizar Compra</h1>
-        <p>Escolha o método de pagamento e envie os dados necessários para concluir a sua inscrição.</p>
+        <p>Escolha o metodo de pagamento e envie os dados necessarios para concluir a sua inscricao.</p>
     </div>
 </section>
 
@@ -26,17 +26,16 @@
 
         <div class="cart-grid">
 
-            <!-- FORMULÁRIO -->
             <div class="payment-panel">
 
-                <h2>Método de Pagamento</h2>
+                <h2>Metodo de pagamento</h2>
 
                 <form action="{{ route('pagamento.processar') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <div class="payment-methods">
 
-                        @foreach($metodos as $valor => $label)
+                        @foreach($metodos as $valor => $metodo)
                             <label class="payment-option">
 
                                 <input
@@ -49,22 +48,14 @@
                                 <div class="payment-card">
 
                                     <div class="payment-icon">
-                                        @if($valor === 'multicaixa_express')
-                                            📱
-                                        @else
-                                            🏦
-                                        @endif
+                                        <i class="bi {{ $metodo['icone'] }}"></i>
                                     </div>
 
                                     <div>
-                                        <strong>{{ $label }}</strong>
+                                        <strong>{{ $metodo['label'] }}</strong>
 
                                         <small>
-                                            @if($valor === 'multicaixa_express')
-                                                Pagamento através do Multicaixa Express.
-                                            @else
-                                                Transferência bancária para a conta indicada.
-                                            @endif
+                                            {{ $metodo['descricao'] }}
                                         </small>
                                     </div>
 
@@ -77,7 +68,7 @@
 
                     <div class="form-group">
                         <label class="field-label">
-                            Número de Telefone
+                            Numero de Telefone
                         </label>
 
                         <input
@@ -107,12 +98,12 @@
                     </div>
 
                     <div class="info-box">
-                        <strong>Validação Automática</strong>
+                        <strong>Validacao Automatica</strong>
 
                         <p>
-                            Após o envio do comprovativo em PDF, o sistema verifica
-                            automaticamente os dados da transferência antes
-                            da liberação do acesso ao curso.
+                            Apos o envio do comprovativo em PDF, o sistema verifica
+                            automaticamente os dados da transferencia antes
+                            da liberacao do acesso ao curso.
                         </p>
                     </div>
 
@@ -124,17 +115,16 @@
 
             </div>
 
-            <!-- RESUMO -->
             <aside class="summary-card">
 
                 <h3>Resumo da Compra</h3>
 
-                @foreach($carrinho as $item)
+                @foreach($resumoCompra as $item)
                     <div class="summary-line">
                         <span>{{ $item['titulo'] }}</span>
 
                         <strong>
-                            {{ number_format($item['preco'] * ($item['quantidade'] ?? 1), 2, ',', '.') }} Kz
+                            {{ number_format($item['total'], 2, ',', '.') }} Kz
                         </strong>
                     </div>
                 @endforeach
@@ -312,7 +302,16 @@ input[type="file"]{
 .summary-line{
     display:flex;
     justify-content:space-between;
+    gap:16px;
     margin-bottom:12px;
+}
+
+.summary-line span{
+    min-width:0;
+}
+
+.summary-line strong{
+    flex-shrink:0;
 }
 
 .summary-card hr{
