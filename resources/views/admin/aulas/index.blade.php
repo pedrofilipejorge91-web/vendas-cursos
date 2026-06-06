@@ -13,13 +13,18 @@
             </ol>
         </nav>
     </div>
-    <!-- Botão de Ação Principal no Topo -->
-    <button type="button" class="btn btn-primary px-4 py-2 shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#basicModal">
-        <i class="bi bi-plus-lg me-1"></i> Nova Aula
-    </button>
+    @if(Auth::user()?->tipo === 'formador')
+        <!-- Botão de Ação Principal no Topo -->
+        <button type="button" class="btn btn-primary px-4 py-2 shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#basicModal">
+            <i class="bi bi-plus-lg me-1"></i> Nova Aula
+        </button>
+    @endif
 </div><!-- End Page Title -->
 
-@include('admin.aulas.create')
+@if(Auth::user()?->tipo === 'formador')
+    @include('admin.aulas.create')
+@endif
+
 
 <section class="section dashboard">
     <div class="row">
@@ -110,13 +115,16 @@
                                                     <i class="bi bi-eye"></i>
                                                 </a>
 
-                                                <!-- Editar -->
-                                                <button type="button" class="btn btn-light btn-sm text-warning shadow-sm border" 
-                                                        data-bs-toggle="modal" data-bs-target="#edit-{{$aula->id}}" title="Editar Aula">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </button>
+                                                @if(Auth::user()?->tipo === 'formador')
+                                                    <!-- Editar -->
+                                                    <button type="button" class="btn btn-light btn-sm text-warning shadow-sm border" 
+                                                            data-bs-toggle="modal" data-bs-target="#edit-{{$aula->id}}" title="Editar Aula">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </button>
+                                                @endif
                                                 
                                                 <!-- Eliminar -->
+
                                                 <button type="button" class="btn btn-light btn-sm text-danger shadow-sm border" 
                                                         data-bs-toggle="modal" data-bs-target="#delete-{{$aula->id}}" title="Eliminar Aula">
                                                     <i class="bi bi-trash"></i>
@@ -126,8 +134,12 @@
                                     </tr>
 
                                     <!-- Modais Organizados -->
-                                    @include('admin.aulas.edit')
+                                    @if(Auth::user()?->tipo === 'formador')
+                                        @include('admin.aulas.edit')
+                                    @endif
                                     @include('admin.aulas.delete')
+
+
 
                                 @empty
                                     <tr>

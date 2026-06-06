@@ -1,0 +1,282 @@
+MODELO LOGICO - COMPATIVEL COM BRMODELO
+Projeto: vendas-cursos
+
+Legenda:
+- PK = chave primaria
+- FK = chave estrangeira
+- UK = chave unica
+
+
+USERS(
+  id PK,
+  name,
+  email UK,
+  email_verified_at,
+  password,
+  tipo,
+  termos_aceites_em,
+  privacidade_aceite_em,
+  remember_token,
+  created_at,
+  updated_at
+)
+
+PESSOAS(
+  id PK,
+  user_id FK -> USERS.id,
+  primeironome,
+  segundonome,
+  BI UK,
+  genero,
+  nacionalidade,
+  data_nascimento,
+  rua,
+  bairro,
+  contacto,
+  created_at,
+  updated_at
+)
+
+ESTUDANTES(
+  id PK,
+  pessoa_id FK -> PESSOAS.id,
+  escola_actual,
+  localizacao,
+  area_interesse,
+  formacao,
+  status,
+  data_inscricao,
+  created_at,
+  updated_at
+)
+
+FORMADORS(
+  id PK,
+  pessoa_id FK -> PESSOAS.id,
+  especialidade,
+  foto_perfil,
+  biografia,
+  anos_experiencia,
+  created_at,
+  updated_at
+)
+
+CATEGORIAS(
+  id PK,
+  nome,
+  descricao UK,
+  imagem,
+  created_at,
+  updated_at
+)
+
+CURSOS(
+  id PK,
+  titulo,
+  descricao,
+  preco,
+  duracao_horas,
+  idioma,
+  status,
+  foto,
+  formador_id FK -> FORMADORS.id,
+  categoria_id FK -> CATEGORIAS.id,
+  created_at,
+  updated_at
+)
+
+AULAS(
+  id PK,
+  titulo,
+  descricao,
+  tipo,
+  numero_aula,
+  duracao_minutos,
+  url_conteudo,
+  curso_id FK -> CURSOS.id,
+  arquivo_video,
+  permite_download,
+  created_at,
+  updated_at
+)
+
+PEDIDOS(
+  id PK,
+  user_id FK -> USERS.id,
+  referencia UK,
+  subtotal,
+  desconto,
+  total,
+  status,
+  expira_em,
+  created_at,
+  updated_at
+)
+
+PEDIDO_ITEMS(
+  id PK,
+  pedido_id FK -> PEDIDOS.id,
+  curso_id FK -> CURSOS.id,
+  titulo,
+  preco,
+  quantidade,
+  created_at,
+  updated_at,
+  UK(pedido_id, curso_id)
+)
+
+PAGAMENTOS(
+  id PK,
+  pedido_id FK -> PEDIDOS.id,
+  referencia UK,
+  metodo,
+  valor,
+  status,
+  telefone,
+  comprovativo,
+  confirmado_em,
+  created_at,
+  updated_at
+)
+
+INSCRICOES(
+  id PK,
+  user_id FK -> USERS.id,
+  curso_id FK -> CURSOS.id,
+  status,
+  created_at,
+  updated_at
+)
+
+MATRICULAS(
+  id PK,
+  user_id FK -> USERS.id,
+  curso_id FK -> CURSOS.id,
+  pedido_id FK -> PEDIDOS.id NULL,
+  progresso,
+  concluido_em,
+  created_at,
+  updated_at,
+  UK(user_id, curso_id)
+)
+
+CURSO_ESTUDANTE(
+  id PK,
+  curso_id FK -> CURSOS.id,
+  estudante_id FK -> ESTUDANTES.id,
+  data_inscricao,
+  status,
+  created_at,
+  updated_at
+)
+
+PROGRESSO_AULAS(
+  id PK,
+  matricula_id FK -> MATRICULAS.id,
+  aula_id FK -> AULAS.id,
+  concluido_em,
+  created_at,
+  updated_at,
+  UK(matricula_id, aula_id)
+)
+
+AVALIACOES(
+  id PK,
+  nota,
+  comentario,
+  resposta_instrutor,
+  respondido_em,
+  curso_id FK -> CURSOS.id,
+  estudante_id FK -> ESTUDANTES.id,
+  created_at,
+  updated_at,
+  UK(estudante_id, curso_id)
+)
+
+CERTIFICADOS(
+  id PK,
+  matricula_id FK -> MATRICULAS.id,
+  codigo UK,
+  emitido_em,
+  created_at,
+  updated_at
+)
+
+CERTIFICADO_SOLICITACOES(
+  id PK,
+  matricula_id FK -> MATRICULAS.id UK,
+  curso_id FK -> CURSOS.id,
+  estudante_id FK -> ESTUDANTES.id,
+  instrutor_id FK -> FORMADORS.id,
+  nota_curso,
+  status,
+  observacoes_admin,
+  enviado_em,
+  decidido_em,
+  created_at,
+  updated_at
+)
+
+CERTIFICADO_QUESTIONARIOS(
+  id PK,
+  matricula_id FK -> MATRICULAS.id UK,
+  curso_id FK -> CURSOS.id,
+  solicitacao_id FK -> CERTIFICADO_SOLICITACOES.id,
+  perguntas,
+  criado_em,
+  fechado_em,
+  created_at,
+  updated_at
+)
+
+CERTIFICADO_RESPOSTAS(
+  id PK,
+  questionario_id FK -> CERTIFICADO_QUESTIONARIOS.id,
+  estudante_id FK -> ESTUDANTES.id,
+  respostas,
+  enviado_em,
+  created_at,
+  updated_at,
+  UK(questionario_id, estudante_id)
+)
+
+NOTIFICACOES(
+  id PK,
+  user_id FK -> USERS.id NULL,
+  canal,
+  titulo,
+  mensagem,
+  lida_em,
+  created_at,
+  updated_at
+)
+
+PASSWORD_RESET_TOKENS(
+  email PK,
+  token,
+  created_at
+)
+
+FAILED_JOBS(
+  id PK,
+  uuid UK,
+  connection,
+  queue,
+  payload,
+  exception,
+  failed_at
+)
+
+PERSONAL_ACCESS_TOKENS(
+  id PK,
+  tokenable_type,
+  tokenable_id,
+  name,
+  token UK,
+  abilities,
+  last_used_at,
+  expires_at,
+  created_at,
+  updated_at
+)
+

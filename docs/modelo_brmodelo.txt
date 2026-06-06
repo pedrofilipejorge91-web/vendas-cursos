@@ -1,0 +1,278 @@
+MODELO CONCEITUAL - COMPATIVEL COM BRMODELO
+Projeto: vendas-cursos
+
+Observacao:
+Este documento esta organizado para ser transcrito no brModelo:
+1. Criar as entidades com seus atributos.
+2. Marcar identificadores com (ID).
+3. Criar os relacionamentos com as cardinalidades indicadas.
+
+
+ENTIDADES E ATRIBUTOS
+
+USUARIO
+- id (ID)
+- name
+- email
+- password
+- tipo
+- email_verified_at
+- termos_aceites_em
+- privacidade_aceite_em
+
+PESSOA
+- id (ID)
+- primeironome
+- segundonome
+- BI
+- genero
+- nacionalidade
+- data_nascimento
+- rua
+- bairro
+- contacto
+
+ESTUDANTE
+- id (ID)
+- escola_actual
+- localizacao
+- area_interesse
+- formacao
+- status
+- data_inscricao
+
+FORMADOR
+- id (ID)
+- especialidade
+- foto_perfil
+- biografia
+- anos_experiencia
+
+CATEGORIA
+- id (ID)
+- nome
+- descricao
+- imagem
+
+CURSO
+- id (ID)
+- titulo
+- descricao
+- preco
+- duracao_horas
+- idioma
+- status
+- foto
+
+AULA
+- id (ID)
+- titulo
+- descricao
+- tipo
+- numero_aula
+- duracao_minutos
+- url_conteudo
+- arquivo_video
+- permite_download
+
+PEDIDO
+- id (ID)
+- referencia
+- subtotal
+- desconto
+- total
+- status
+- expira_em
+
+ITEM_PEDIDO
+- id (ID)
+- titulo
+- preco
+- quantidade
+
+PAGAMENTO
+- id (ID)
+- referencia
+- metodo
+- valor
+- status
+- telefone
+- comprovativo
+- confirmado_em
+
+MATRICULA
+- id (ID)
+- progresso
+- concluido_em
+
+INSCRICAO
+- id (ID)
+- status
+
+PROGRESSO_AULA
+- id (ID)
+- concluido_em
+
+AVALIACAO
+- id (ID)
+- nota
+- comentario
+- resposta_instrutor
+- respondido_em
+
+CERTIFICADO
+- id (ID)
+- codigo
+- emitido_em
+
+SOLICITACAO_CERTIFICADO
+- id (ID)
+- nota_curso
+- status
+- observacoes_admin
+- enviado_em
+- decidido_em
+
+QUESTIONARIO_CERTIFICADO
+- id (ID)
+- perguntas
+- criado_em
+- fechado_em
+
+RESPOSTA_CERTIFICADO
+- id (ID)
+- respostas
+- enviado_em
+
+NOTIFICACAO
+- id (ID)
+- canal
+- titulo
+- mensagem
+- lida_em
+
+
+RELACIONAMENTOS E CARDINALIDADES
+
+USUARIO possui PESSOA
+- USUARIO (1,1)
+- PESSOA (1,1)
+
+PESSOA especializa ESTUDANTE
+- PESSOA (1,1)
+- ESTUDANTE (0,1)
+
+PESSOA especializa FORMADOR
+- PESSOA (1,1)
+- FORMADOR (0,1)
+
+CATEGORIA classifica CURSO
+- CATEGORIA (1,1)
+- CURSO (0,N)
+
+FORMADOR ministra CURSO
+- FORMADOR (1,1)
+- CURSO (0,N)
+
+CURSO contem AULA
+- CURSO (1,1)
+- AULA (0,N)
+
+USUARIO realiza PEDIDO
+- USUARIO (1,1)
+- PEDIDO (0,N)
+
+PEDIDO contem ITEM_PEDIDO
+- PEDIDO (1,1)
+- ITEM_PEDIDO (1,N)
+
+CURSO compoe ITEM_PEDIDO
+- CURSO (1,1)
+- ITEM_PEDIDO (0,N)
+
+PEDIDO possui PAGAMENTO
+- PEDIDO (1,1)
+- PAGAMENTO (0,N)
+
+USUARIO efetua MATRICULA
+- USUARIO (1,1)
+- MATRICULA (0,N)
+
+CURSO recebe MATRICULA
+- CURSO (1,1)
+- MATRICULA (0,N)
+
+PEDIDO origina MATRICULA
+- PEDIDO (0,1)
+- MATRICULA (0,N)
+
+USUARIO faz INSCRICAO
+- USUARIO (1,1)
+- INSCRICAO (0,N)
+
+CURSO recebe INSCRICAO
+- CURSO (1,1)
+- INSCRICAO (0,N)
+
+MATRICULA registra PROGRESSO_AULA
+- MATRICULA (1,1)
+- PROGRESSO_AULA (0,N)
+
+AULA possui PROGRESSO_AULA
+- AULA (1,1)
+- PROGRESSO_AULA (0,N)
+
+ESTUDANTE faz AVALIACAO
+- ESTUDANTE (1,1)
+- AVALIACAO (0,N)
+
+CURSO recebe AVALIACAO
+- CURSO (1,1)
+- AVALIACAO (0,N)
+
+MATRICULA gera CERTIFICADO
+- MATRICULA (1,1)
+- CERTIFICADO (0,1)
+
+MATRICULA possui SOLICITACAO_CERTIFICADO
+- MATRICULA (1,1)
+- SOLICITACAO_CERTIFICADO (0,1)
+
+CURSO participa SOLICITACAO_CERTIFICADO
+- CURSO (1,1)
+- SOLICITACAO_CERTIFICADO (0,N)
+
+ESTUDANTE solicita SOLICITACAO_CERTIFICADO
+- ESTUDANTE (1,1)
+- SOLICITACAO_CERTIFICADO (0,N)
+
+FORMADOR avalia SOLICITACAO_CERTIFICADO
+- FORMADOR (1,1)
+- SOLICITACAO_CERTIFICADO (0,N)
+
+SOLICITACAO_CERTIFICADO possui QUESTIONARIO_CERTIFICADO
+- SOLICITACAO_CERTIFICADO (1,1)
+- QUESTIONARIO_CERTIFICADO (0,1)
+
+QUESTIONARIO_CERTIFICADO recebe RESPOSTA_CERTIFICADO
+- QUESTIONARIO_CERTIFICADO (1,1)
+- RESPOSTA_CERTIFICADO (0,N)
+
+ESTUDANTE envia RESPOSTA_CERTIFICADO
+- ESTUDANTE (1,1)
+- RESPOSTA_CERTIFICADO (0,N)
+
+USUARIO recebe NOTIFICACAO
+- USUARIO (0,1)
+- NOTIFICACAO (0,N)
+
+
+OBSERVACAO DE MODELAGEM
+
+As migrations possuem tres estruturas parecidas para vincular aluno e curso:
+- INSCRICAO, ligada a USUARIO e CURSO.
+- MATRICULA, ligada a USUARIO, CURSO e opcionalmente PEDIDO.
+- curso_estudante, ligada a ESTUDANTE e CURSO.
+
+No brModelo, para um modelo academico mais limpo, recomenda-se manter MATRICULA como entidade associativa principal entre USUARIO/ESTUDANTE e CURSO. Entretanto, o modelo acima preserva o que existe nas migrations.
+

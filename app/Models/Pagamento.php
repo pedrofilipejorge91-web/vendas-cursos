@@ -17,10 +17,12 @@ class Pagamento extends Model
         'status',
         'telefone',
         'comprovativo',
+        'gateway_payload',
         'confirmado_em',
     ];
 
     protected $casts = [
+        'gateway_payload' => 'array',
         'confirmado_em' => 'datetime',
     ];
 

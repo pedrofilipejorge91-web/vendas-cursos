@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Matricula;
 use App\Models\Pagamento;
 use App\Models\Pedido;
+use App\Services\FasmaPayService;
 use App\Services\NotificacaoService;
 use App\Services\PagamentoGatewayService;
 use Illuminate\Http\Request;
@@ -33,24 +34,41 @@ class PagamentoController extends Controller
     public function processar(Request $request)
     {
         $request->validate([
-            'metodo_pagamento' => 'required|in:multicaixa_express,transferencia_bancaria,mbway_angola,pagamento_presencial',
+           'metodo_pagamento' => 'required|in:multicaixa_express,transferencia_bancaria',
             'telefone' => 'nullable|string|max:30',
             'comprovativo' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:4096',
         ]);
 
-        $carrinho = session()->get('carrinho', []);
 
-        if (empty($carrinho)) {
-            return redirect()
-                ->route('home.carrinho')
-                ->withErrors(['carrinho' => 'O carrinho esta vazio.']);
-        }
+      $carrinho = session()->get('carrinho', []);
 
-        $comprovativoPath = $request->hasFile('comprovativo')
-            ? $request->file('comprovativo')->store('comprovativos', 'public')
-            : null;
+if (empty($carrinho)) {
+    return redirect()
+        ->route('home.carrinho')
+        ->withErrors(['carrinho' => 'O carrinho esta vazio.']);
+}
 
-        $pedido = DB::transaction(function () use ($request, $carrinho, $comprovativoPath) {
+$gatewayPayload = null;
+$pagamentoConfirmado = false;
+
+if ($request->hasFile('comprovativo')) {
+
+    $validacao = app(FasmaPayService::class)
+        ->validarComprovativo($request->file('comprovativo'));
+
+    $gatewayPayload = $validacao['response'];
+
+    if ($validacao['valid']) {
+        $pagamentoConfirmado = true;
+    }
+}
+
+$comprovativoPath = $request->hasFile('comprovativo')
+    ? $request->file('comprovativo')->store('comprovativos', 'public')
+    : null;
+       
+
+        $pedido = DB::transaction(function () use ($request, $carrinho, $comprovativoPath, $gatewayPayload, $pagamentoConfirmado) {
             [$subtotal, $desconto, $total] = $this->calcularTotais($carrinho);
 
             $pedido = Pedido::create([
@@ -59,8 +77,8 @@ class PagamentoController extends Controller
                 'subtotal' => $subtotal,
                 'desconto' => $desconto,
                 'total' => $total,
-                'status' => 'pendente',
-                'expira_em' => now()->addHours(48),
+                'status' => $pagamentoConfirmado ? 'pago' : 'pendente',
+                'expira_em' => $pagamentoConfirmado ? null : now()->addHours(48),
             ]);
 
             foreach ($carrinho as $cursoId => $item) {
@@ -76,16 +94,25 @@ class PagamentoController extends Controller
                 'referencia' => $this->gerarReferencia('PAY'),
                 'metodo' => $request->metodo_pagamento,
                 'valor' => $total,
-                'status' => 'pendente',
+                'status' => $pagamentoConfirmado ? 'confirmado' : 'pendente',
                 'telefone' => $request->telefone,
                 'comprovativo' => $comprovativoPath,
-                'confirmado_em' => null,
+                'gateway_payload' => $gatewayPayload,
+                'confirmado_em' => $pagamentoConfirmado ? now() : null,
             ]);
 
             return $pedido->load('itens', 'pagamento');
         });
 
         session()->forget('carrinho');
+
+        if ($pagamentoConfirmado) {
+            $this->liberarMatriculas($pedido);
+
+            return redirect()
+                ->route('pagamento.comprovante', $pedido)
+                ->with('success', 'Comprovativo validado pela FasmaPay. Pagamento confirmado e acesso liberado.');
+        }
 
         app(NotificacaoService::class)->enviar(
             Auth::user(),

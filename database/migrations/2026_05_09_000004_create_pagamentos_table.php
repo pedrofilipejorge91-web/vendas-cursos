@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('pedido_id')->constrained('pedidos')->cascadeOnDelete();
             $table->string('referencia')->unique();
-            $table->enum('metodo', ['multicaixa_express', 'transferencia_bancaria', 'mbway_angola', 'pagamento_presencial']);
+                $table->enum('metodo', ['multicaixa_express','transferencia_bancaria']);
             $table->decimal('valor', 12, 2);
             $table->enum('status', ['pendente', 'confirmado', 'rejeitado', 'expirado'])->default('pendente');
             $table->string('telefone')->nullable();
