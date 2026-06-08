@@ -11,6 +11,7 @@ use App\Services\SudoPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PagamentoController extends Controller
@@ -57,35 +58,33 @@ class PagamentoController extends Controller
             'telefone' => 'nullable|string|max:30',
         ]);
 
+        $carrinho = session()->get('carrinho', []);
 
-$carrinho = session()->get('carrinho', []);
+        if (empty($carrinho)) {
+            return redirect()
+                ->route('home.carrinho')
+                ->withErrors(['carrinho' => 'O carrinho esta vazio.']);
+        }
 
-if (empty($carrinho)) {
-    return redirect()
-        ->route('home.carrinho')
-        ->withErrors(['carrinho' => 'O carrinho esta vazio.']);
-}
+        $cursosIndisponiveis = $this->cursosJaCompradosOuPendentes(array_keys($carrinho));
 
-$cursosIndisponiveis = $this->cursosJaCompradosOuPendentes(array_keys($carrinho));
+        if (! empty($cursosIndisponiveis)) {
+            foreach ($cursosIndisponiveis as $cursoId) {
+                unset($carrinho[$cursoId]);
+            }
 
-if (! empty($cursosIndisponiveis)) {
-    foreach ($cursosIndisponiveis as $cursoId) {
-        unset($carrinho[$cursoId]);
-    }
+            session()->put('carrinho', $carrinho);
 
-    session()->put('carrinho', $carrinho);
+            return redirect()
+                ->route('home.carrinho')
+                ->withErrors(['carrinho' => 'Removemos do carrinho cursos que ja foram comprados ou que ja tem pedido pendente.']);
+        }
 
-    return redirect()
-        ->route('home.carrinho')
-        ->withErrors(['carrinho' => 'Removemos do carrinho cursos que ja foram comprados ou que ja tem pedido pendente.']);
-}
+        [$subtotal, $desconto, $total] = $this->calcularTotais($carrinho);
 
-[$subtotal, $desconto, $total] = $this->calcularTotais($carrinho);
-
-$gatewayPayload = null;
-$pagamentoConfirmado = false;
-$comprovativoPath = null;
-       
+        $gatewayPayload = null;
+        $pagamentoConfirmado = false;
+        $comprovativoPath = null;
 
         $pedido = DB::transaction(function () use ($request, $carrinho, $subtotal, $desconto, $total, $comprovativoPath, $gatewayPayload, $pagamentoConfirmado) {
             $pedido = Pedido::create([
@@ -175,8 +174,10 @@ $comprovativoPath = null;
 
         $pedido->load('itens', 'pagamento', 'user');
 
-        $validacao = app(SudoPayService::class)
-            ->validarComprovativo($request->file('comprovativo'));
+        $sudoPayService = app(SudoPayService::class);
+
+        // 1. Validar o comprovativo na SudoPay (verifica se o PDF é legítimo)
+        $validacao = $sudoPayService->validarComprovativo($request->file('comprovativo'));
 
         if (! $validacao['valid']) {
             return redirect()
@@ -184,30 +185,55 @@ $comprovativoPath = null;
                 ->withErrors(['comprovativo' => $validacao['message']]);
         }
 
-        $valorPago = $this->valorPagoNoComprovativo($validacao['response']);
+        $dadosSudoPay = $validacao['response'];
+
+        // 2. Verificar se o dinheiro foi para a NOSSA conta (IBAN)
+        if (! $sudoPayService->verificarIBAN($dadosSudoPay)) {
+            return redirect()
+                ->back()
+                ->withErrors(['comprovativo' => 'Este comprovativo nao foi transferido para a nossa conta bancaria. Verifique os dados de pagamento.']);
+        }
+
+        // 3. Verificar o nome do beneficiário (camada extra de segurança)
+        if (! $sudoPayService->verificarNomeBeneficiario($dadosSudoPay)) {
+            return redirect()
+                ->back()
+                ->withErrors(['comprovativo' => 'O nome do beneficiario no comprovativo nao corresponde aos nossos dados.']);
+        }
+
+        // 4. Verificar se o valor pago cobre o total do pedido
+        $valorPago = $this->valorPagoNoComprovativo($dadosSudoPay);
 
         if ($valorPago === null || $valorPago < (float) $pedido->total) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'comprovativo' => 'O comprovativo foi reconhecido, mas o valor pago nao cobre o total da compra.',
+                    'comprovativo' => 'O comprovativo foi reconhecido, mas o valor pago ('.number_format($valorPago ?? 0, 2, ',', '.').' Kz) nao cobre o total da compra ('.number_format($pedido->total, 2, ',', '.').' Kz).',
                 ]);
         }
 
-        $comprovativoPath = $request->file('comprovativo')->store('comprovativos', 'public');
+        // 5. Tudo OK! Guardar o PDF e confirmar o pagamento
+        $comprovativoPath = $request->file('comprovativo')->store('comprovativos/'.$pedido->id, 'public');
 
-        DB::transaction(function () use ($pedido, $comprovativoPath, $validacao) {
+        DB::transaction(function () use ($pedido, $comprovativoPath, $dadosSudoPay) {
             $pedido->update(['status' => 'pago', 'expira_em' => null]);
 
             $pedido->pagamento?->update([
                 'status' => 'confirmado',
                 'comprovativo' => $comprovativoPath,
-                'gateway_payload' => $validacao['response'],
+                'gateway_payload' => $dadosSudoPay,
                 'confirmado_em' => now(),
             ]);
 
             $this->liberarMatriculas($pedido);
         });
+
+        Log::info('Pagamento confirmado automaticamente via SudoPay', [
+            'pedido_id' => $pedido->id,
+            'user_id' => $pedido->user_id,
+            'valor' => $valorPago,
+            'transacao_id' => $dadosSudoPay['TRANSACAO'] ?? null,
+        ]);
 
         return redirect()
             ->route('pagamento.comprovante', $pedido)

@@ -90,4 +90,55 @@ class SudoPayService
             ];
         }
     }
+
+        /**
+     * Verifica se o IBAN do beneficiário no comprovativo corresponde à conta da empresa
+     */
+    public function verificarIBAN(array $dadosSudoPay): bool
+    {
+        $ibanRecebido = str_replace(['.', ' '], '', $dadosSudoPay['B_IBAN'] ?? '');
+        $meuIban = str_replace(['.', ' '], '', config('services.sudopay.meu_iban', ''));
+
+        if (blank($meuIban)) {
+            Log::warning('SudoPay: IBAN da empresa não configurado em services.sudopay.meu_iban');
+            return false;
+        }
+
+        $corresponde = $ibanRecebido === $meuIban;
+
+        if (! $corresponde) {
+            Log::warning('SudoPay: IBAN não corresponde à conta da empresa', [
+                'iban_no_comprovativo' => $dadosSudoPay['B_IBAN'] ?? 'N/A',
+                'iban_esperado' => config('services.sudopay.meu_iban'),
+            ]);
+        }
+
+        return $corresponde;
+    }
+
+    /**
+     * Verifica se o nome do beneficiário no comprovativo corresponde ao configurado
+     */
+    public function verificarNomeBeneficiario(array $dadosSudoPay): bool
+    {
+        $nomeRecebido = strtoupper(trim($dadosSudoPay['B_NOME'] ?? ''));
+        $meuNome = strtoupper(trim(config('services.sudopay.meu_nome_beneficiario', '')));
+
+        if (blank($meuNome)) {
+            Log::warning('SudoPay: Nome do beneficiário não configurado em services.sudopay.meu_nome_beneficiario');
+            return false;
+        }
+
+        $corresponde = $nomeRecebido === $meuNome;
+
+        if (! $corresponde) {
+            Log::warning('SudoPay: Nome do beneficiário não corresponde', [
+                'nome_no_comprovativo' => $dadosSudoPay['B_NOME'] ?? 'N/A',
+                'nome_esperado' => config('services.sudopay.meu_nome_beneficiario'),
+            ]);
+        }
+
+        return $corresponde;
+    }
+
 }

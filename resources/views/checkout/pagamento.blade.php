@@ -30,7 +30,7 @@
 
                 <h2>Metodo de pagamento</h2>
 
-                <form action="{{ route('pagamento.processar') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('pagamento.processar') }}" method="POST">
                     @csrf
 
                     <div class="payment-methods">
@@ -79,36 +79,18 @@
                         >
                     </div>
 
-                    <div class="upload-box">
-
-                        <label class="field-label">
-                            Comprovativo de Pagamento
-                        </label>
-
-                        <input
-                            type="file"
-                            name="comprovativo"
-                            accept=".pdf,application/pdf"
-                        >
-
-                        <small>
-                            Formato aceite: PDF (Maximo 4MB).
-                        </small>
-
-                    </div>
-
                     <div class="info-box">
                         <strong>Validacao Automatica</strong>
 
                         <p>
-                            Apos o envio do comprovativo em PDF, o sistema verifica
-                            automaticamente os dados da transferencia antes
+                            Apos criar o pedido, voce recebera as instrucoes de pagamento.
+                            Envie o comprovativo em PDF para validacao automatica antes
                             da liberacao do acesso ao curso.
                         </p>
                     </div>
 
                     <button type="submit" class="btn-full primary">
-                        Confirmar Pagamento
+                        Criar Pedido
                     </button>
 
                 </form>
@@ -158,7 +140,6 @@
 </section>
 
 <style>
-
 .cart-grid{
     display:grid;
     grid-template-columns:2fr 1fr;
@@ -230,26 +211,11 @@
     font-weight:600;
 }
 
-input[type="text"],
-input[type="file"]{
+input[type="text"]{
     width:100%;
     padding:12px;
     border:1px solid #d1d5db;
     border-radius:10px;
-}
-
-.upload-box{
-    margin-top:15px;
-    padding:20px;
-    border:2px dashed #d1d5db;
-    border-radius:14px;
-    background:#f9fafb;
-}
-
-.upload-box small{
-    display:block;
-    margin-top:10px;
-    color:#6b7280;
 }
 
 .info-box{
@@ -344,7 +310,6 @@ input[type="file"]{
 }
 
 @media(max-width:768px){
-
     .cart-grid{
         grid-template-columns:1fr;
     }
@@ -353,8 +318,6 @@ input[type="file"]{
         position:relative;
         top:auto;
     }
-
 }
-
 </style>
 @endsection

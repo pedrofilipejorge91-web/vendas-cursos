@@ -30,11 +30,12 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-
-    'sudopay' => [
-        'key' => env('SUDOPAY_API_KEY'),
-        'endpoint' => env('SUDOPAY_ENDPOINT', 'https://comprovativos.sudomakes.com/validar/'),
-        'timeout' => env('SUDOPAY_TIMEOUT', 30),
-    ],
+'sudopay' => [
+    'key' => env('SUDOPAY_API_KEY'),
+    'endpoint' => env('SUDOPAY_ENDPOINT', 'https://comprovativos.sudomakes.com/validar/'),
+    'timeout' => env('SUDOPAY_TIMEOUT', 30),
+    'meu_iban' => env('MEU_IBAN', ''),
+    'meu_nome_beneficiario' => env('MEU_NOME_BENEFICIARIO', ''),
+],
 
 ];
