@@ -48,6 +48,7 @@ class AuthController extends Controller
         DB::beginTransaction();
 
         try {
+            // 1. Criar o utilizador
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -57,6 +58,7 @@ class AuthController extends Controller
                 'privacidade_aceite_em' => now(),
             ]);
 
+            // 2. Criar os dados pessoais
             $pessoa = Pessoa::create([
                 'user_id' => $user->id,
                 'primeironome' => $request->primeironome,
@@ -70,58 +72,65 @@ class AuthController extends Controller
                 'contacto' => $request->contacto,
             ]);
 
+            // 3. Criar o registo de estudante (ATIVO automaticamente)
             Estudante::create([
                 'pessoa_id' => $pessoa->id,
                 'escola_actual' => $request->escola_actual,
-                'status' => 'inativo',
+                'status' => 'ativo', // ✅ Conta ativa imediatamente
                 'data_inscricao' => now(),
             ]);
 
             DB::commit();
 
+            // 4. Enviar notificação de boas-vindas ao aluno
             $notificador = app(NotificacaoService::class);
             $notificador->enviar(
                 $user,
-                'Inscricao recebida com sucesso',
-                'A sua inscricao foi recebida com sucesso e sera analisada pela administracao. Assim que a conta for aprovada, recebera uma notificacao e podera usufruir dos nossos servicos.',
+                'Bem-vindo à Paruana Comercial!',
+                'A tua conta foi criada com sucesso e já está ativa. Podes começar a explorar os nossos cursos e fazer a tua inscrição agora mesmo!',
                 ['email'],
                 [
-                    'intro' => 'Bem-vindo a Paruana Comercial.',
+                    'intro' => 'Olá ' . $request->primeironome . ',',
                     'linhas' => [
-                        'Estado da conta' => 'Aguardando activacao',
+                        'Estado da conta' => 'Ativa',
                         'Perfil' => 'Aluno',
+                        'Próximo passo' => 'Escolhe um curso e começa a aprender!',
                     ],
                     'acao_url' => route('login'),
-                    'acao_texto' => 'Ir para login',
-                    'rodape' => 'Enquanto aguarda a activacao, pode guardar este email como confirmacao do seu cadastro.',
-                    'preheader' => 'Cadastro recebido e aguardando activacao administrativa.',
+                    'acao_texto' => 'Fazer Login',
+                    'rodape' => 'Paruana Comercial - Excelência no ensino e rigor nos resultados.',
+                    'preheader' => 'A tua conta está ativa e pronta a usar!',
                 ]
             );
 
-            User::where('tipo', 'admin')->each(function (User $admin) use ($notificador, $user) {
+            // 5. Notificar administradores sobre novo aluno (opcional - apenas informativo)
+            User::where('tipo', 'admin')->each(function (User $admin) use ($notificador, $user, $request) {
                 $notificador->enviar(
                     $admin,
-                    'Nova conta de aluno aguardando activacao',
-                    'O aluno '.$user->nome_completo.' concluiu o cadastro e precisa de activacao para aceder a plataforma.',
+                    'Novo aluno registado na plataforma',
+                    'Um novo aluno acabou de se registar e a conta já foi ativada automaticamente.',
                     ['email'],
                     [
                         'linhas' => [
-                            'Aluno' => $user->nome_completo,
+                            'Aluno' => $request->primeironome . ' ' . $request->segundonome,
                             'Email' => $user->email,
+                            'Contacto' => $request->contacto,
+                            'Escola' => $request->escola_actual ?? 'Não informado',
                         ],
                         'acao_url' => route('estudante.index'),
-                        'acao_texto' => 'Rever alunos',
-                        'preheader' => 'Existe um novo aluno aguardando activacao.',
+                        'acao_texto' => 'Ver Alunos',
+                        'preheader' => 'Novo aluno ativo na plataforma.',
                     ]
                 );
             });
 
             return redirect()->route('login')
-                ->with('success', 'Inscricao realizada com sucesso. A sua conta sera analisada pela administracao. Assim que for aprovada, recebera uma notificacao e podera usufruir dos nossos servicos.');
+                ->with('success', 'Inscrição realizada com sucesso! A tua conta já está ativa. Podes fazer login e começar a usar a plataforma.');
+
         } catch (\Exception $e) {
             DB::rollback();
 
-            return back()->with('error', 'Erro: ' . $e->getMessage());
+            return back()->with('error', 'Erro ao criar conta: ' . $e->getMessage());
         }
     }
 
@@ -146,26 +155,13 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return back()->withErrors(['email' => 'Credenciais invalidas']);
+            return back()->withErrors(['email' => 'Credenciais inválidas']);
         }
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            if ($user->tipo === 'estudante') {
-                $estudante = $user->pessoa?->estudante;
-
-                if (!$estudante || $estudante->status !== 'ativo') {
-                    Auth::logout();
-
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
-
-                    return redirect()->route('login')
-                        ->withInput($request->only('email'))
-                        ->with('error', 'a sua conta ainda nao foi verificada, aguardando o admin, recebera uma notificao quando estiver activa');
-                }
-            }
+            // ✅ Removida a verificação de status - todas as contas são ativas automaticamente
 
             return match ($user->tipo) {
                 'admin' => redirect()->route('admin.dashboard'),
@@ -176,7 +172,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Credenciais invalidas'
+            'email' => 'Credenciais inválidas'
         ]);
     }
 

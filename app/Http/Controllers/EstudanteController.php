@@ -20,102 +20,104 @@ class EstudanteController extends Controller
         return view('admin.estudante.dashboard', compact('estudantes'));
     }
 
-    // CREATE (opcional se usar modal)
+    // CREATE (criação manual pelo admin)
     public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|min:6',
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
 
-        'primeironome' => 'required',
-        'segundonome' => 'required',
-        'BI' => 'required|unique:pessoas,BI',
-        'genero' => 'required',
-        'nacionalidade' => 'required',
-        'data_nascimento' => 'required',
-        'rua' => 'required',
-        'bairro' => 'required',
-        'contacto' => 'required|unique:pessoas,contacto',
+            'primeironome' => 'required',
+            'segundonome' => 'required',
+            'BI' => 'required|unique:pessoas,BI',
+            'genero' => 'required',
+            'nacionalidade' => 'required',
+            'data_nascimento' => 'required',
+            'rua' => 'required',
+            'bairro' => 'required',
+            'contacto' => 'required|unique:pessoas,contacto',
 
-        'escola_actual' => 'nullable|string',
-    ], [
-        'email.unique' => 'O email inserido ja existe.',
-        'BI.unique' => 'O B.I inserido ja existe.',
-        'contacto.unique' => 'O contacto inserido ja existe.',
-    ]);
-
-    DB::beginTransaction();
-
-    try {
-
-        // USER
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'tipo' => 'estudante',
+            'escola_actual' => 'nullable|string',
+        ], [
+            'email.unique' => 'O email inserido ja existe.',
+            'BI.unique' => 'O B.I inserido ja existe.',
+            'contacto.unique' => 'O contacto inserido ja existe.',
         ]);
 
-        // PESSOA
-        $pessoa = Pessoa::create([
-            'user_id' => $user->id,
-            'primeironome' => $request->primeironome,
-            'segundonome' => $request->segundonome,
-            'BI' => $request->BI,
-            'genero' => $request->genero,
-            'nacionalidade' => $request->nacionalidade,
-            'data_nascimento' => $request->data_nascimento,
-            'rua' => $request->rua,
-            'bairro' => $request->bairro,
-            'contacto' => $request->contacto,
-        ]);
+        DB::beginTransaction();
 
-        // ESTUDANTE
-        $estudante = Estudante::create([
-            'pessoa_id' => $pessoa->id,
-            'escola_actual' => $request->escola_actual,
-            'status' => 'inativo',
-            'data_inscricao' => now(),
-        ]);
+        try {
+            // USER
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'tipo' => 'estudante',
+            ]);
 
-        DB::commit();
+            // PESSOA
+            $pessoa = Pessoa::create([
+                'user_id' => $user->id,
+                'primeironome' => $request->primeironome,
+                'segundonome' => $request->segundonome,
+                'BI' => $request->BI,
+                'genero' => $request->genero,
+                'nacionalidade' => $request->nacionalidade,
+                'data_nascimento' => $request->data_nascimento,
+                'rua' => $request->rua,
+                'bairro' => $request->bairro,
+                'contacto' => $request->contacto,
+            ]);
 
-        app(NotificacaoService::class)->enviar(
-            $user,
-            'Conta de aluno criada',
-            'A equipa administrativa criou a sua conta de aluno. A conta ainda precisa de activacao para permitir o acesso.',
-            ['email'],
-            [
-                'linhas' => [
-                    'Perfil' => 'Aluno',
-                    'Estado da conta' => 'Inactivo',
-                ],
-                'acao_url' => route('login'),
-                'acao_texto' => 'Abrir plataforma',
-                'rodape' => 'Use o email cadastrado e a senha definida no registo administrativo para iniciar sessao quando a conta estiver activa.',
-            ]
-        );
+            // ESTUDANTE - ✅ Agora criado como ATIVO automaticamente
+            $estudante = Estudante::create([
+                'pessoa_id' => $pessoa->id,
+                'escola_actual' => $request->escola_actual,
+                'status' => 'ativo', // ✅ Alterado de 'inativo' para 'ativo'
+                'data_inscricao' => now(),
+            ]);
 
-        return redirect()->back()->with('success', 'Estudante criado com sucesso!');
+            DB::commit();
 
-    } catch (\Exception $e) {
+            // ✅ Notificação atualizada - conta já está ativa
+            app(NotificacaoService::class)->enviar(
+                $user,
+                'Conta de aluno criada com sucesso',
+                'A equipa administrativa criou a sua conta de aluno. A conta ja esta ativa e pronta para uso. Podes fazer login e comecar a explorar os nossos cursos!',
+                ['email'],
+                [
+                    'intro' => 'Ola ' . $request->primeironome . ',',
+                    'linhas' => [
+                        'Perfil' => 'Aluno',
+                        'Estado da conta' => 'Ativo',
+                        'Proximo passo' => 'Faz login e comeca a aprender!',
+                    ],
+                    'acao_url' => route('login'),
+                    'acao_texto' => 'Fazer Login',
+                    'rodape' => 'As credenciais de acesso foram definidas pela administracao. Em caso de duvida, contacta o suporte.',
+                    'preheader' => 'A tua conta esta ativa e pronta a usar!',
+                ]
+            );
 
-        DB::rollback();
+            return redirect()->back()->with('success', 'Estudante criado com sucesso! A conta ja esta ativa.');
 
-        return redirect()->back()
-            ->withInput()
-            ->with('error', 'Erro ao criar estudante: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Erro ao criar estudante: ' . $e->getMessage());
+        }
     }
-}
 
     // SHOW
     public function show($id)
     {
         $estudante = Estudante::with([
-    'pessoa.user',
-    'cursos'
-])->findOrFail($id);
+            'pessoa.user',
+            'cursos'
+        ])->findOrFail($id);
 
         return view('admin.estudante.show', compact('estudante'));
     }
@@ -187,7 +189,6 @@ class EstudanteController extends Controller
         DB::beginTransaction();
 
         try {
-
             // delete estudante
             $estudante->delete();
 
@@ -213,40 +214,41 @@ class EstudanteController extends Controller
         }
     }
 
-    // BOTÃO STATUS (ATIVAR/DESATIVAR)
-  public function mudarStatus($id)
-{
-    $estudante = Estudante::findOrFail($id);
+    // BOTÃO STATUS (SUSPENDER/REATIVAR conta em casos excecionais)
+    public function mudarStatus($id)
+    {
+        $estudante = Estudante::findOrFail($id);
 
-    // ALTERAR STATUS
-    $estudante->status = $estudante->status == 'ativo'
-        ? 'inativo'
-        : 'ativo';
+        // ALTERAR STATUS
+        $estudante->status = $estudante->status == 'ativo'
+            ? 'inativo'
+            : 'ativo';
 
-    $estudante->save();
+        $estudante->save();
 
-    $user = $estudante->pessoa?->user;
-    $ativo = $estudante->status === 'ativo';
+        $user = $estudante->pessoa?->user;
+        $ativo = $estudante->status === 'ativo';
 
-    app(NotificacaoService::class)->enviar(
-        $user,
-        $ativo ? 'Conta activada' : 'Conta desactivada',
-        $ativo
-            ? 'A sua conta de aluno foi activada. Ja pode iniciar sessao e aceder aos cursos disponiveis.'
-            : 'A sua conta de aluno foi desactivada temporariamente. Se precisar de ajuda, contacte a administracao.',
-        ['email', 'sms'],
-        [
-            'linhas' => [
-                'Estado da conta' => $ativo ? 'Activo' : 'Inactivo',
-                'Perfil' => 'Aluno',
-            ],
-            'acao_url' => $ativo ? route('login') : null,
-            'acao_texto' => 'Entrar na plataforma',
-            'preheader' => $ativo ? 'A sua conta ja esta activa.' : 'O acesso a sua conta foi suspenso.',
-        ]
-    );
+        // ✅ Mensagens ajustadas - agora é para casos excecionais (suspensão)
+        app(NotificacaoService::class)->enviar(
+            $user,
+            $ativo ? 'Conta reativada' : 'Conta suspensa temporariamente',
+            $ativo
+                ? 'A sua conta de aluno foi reativada. Ja pode iniciar sessao e aceder novamente aos cursos disponiveis.'
+                : 'A sua conta de aluno foi suspensa temporariamente pela administracao. Se precisar de ajuda, contacte o suporte.',
+            ['email', 'sms'],
+            [
+                'linhas' => [
+                    'Estado da conta' => $ativo ? 'Ativo' : 'Suspenso',
+                    'Perfil' => 'Aluno',
+                ],
+                'acao_url' => $ativo ? route('login') : null,
+                'acao_texto' => $ativo ? 'Entrar na plataforma' : null,
+                'preheader' => $ativo ? 'A sua conta foi reativada.' : 'O acesso a sua conta foi suspenso.',
+            ]
+        );
 
-    return redirect()->back()
-        ->with('success', 'Status actualizado com sucesso!');
-}
+        return redirect()->back()
+            ->with('success', 'Status actualizado com sucesso!');
+    }
 }
