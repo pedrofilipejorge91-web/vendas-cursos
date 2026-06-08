@@ -56,7 +56,7 @@ class PagamentoGatewayService
      */
     public function validarComprovativoSudoPay(UploadedFile $pdf): array
     {
-        $url = config('services.sudopay.url');
+        $url = config('services.sudopay.endpoint');
         $apiKey = config('services.sudopay.key');
 
         try {
