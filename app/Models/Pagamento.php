@@ -19,6 +19,7 @@ class Pagamento extends Model
         'comprovativo',
         'gateway_payload',
         'confirmado_em',
+        'transacao_id',
     ];
 
     protected $casts = [

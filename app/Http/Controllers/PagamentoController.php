@@ -163,82 +163,104 @@ class PagamentoController extends Controller
         return view('checkout.comprovante', compact('pedido', 'gatewayDescription'));
     }
 
-    public function enviarComprovativo(Request $request, Pedido $pedido)
-    {
-        abort_unless($pedido->user_id === Auth::id(), 403);
-        abort_unless($pedido->status === 'pendente', 403);
+ public function enviarComprovativo(Request $request, Pedido $pedido)
+{
+    abort_unless($pedido->user_id === Auth::id(), 403);
+    abort_unless($pedido->status === 'pendente', 403);
 
-        $request->validate([
-            'comprovativo' => 'required|file|mimes:pdf|max:4096',
-        ]);
+    $request->validate([
+        'comprovativo' => 'required|file|mimes:pdf|max:4096',
+    ]);
 
-        $pedido->load('itens', 'pagamento', 'user');
+    $pedido->load('itens', 'pagamento', 'user');
 
-        $sudoPayService = app(SudoPayService::class);
+    $sudoPayService = app(SudoPayService::class);
 
-        // 1. Validar o comprovativo na SudoPay (verifica se o PDF é legítimo)
-        $validacao = $sudoPayService->validarComprovativo($request->file('comprovativo'));
+    // 1. Validar o comprovativo na SudoPay
+    $validacao = $sudoPayService->validarComprovativo($request->file('comprovativo'));
 
-        if (! $validacao['valid']) {
-            return redirect()
-                ->back()
-                ->withErrors(['comprovativo' => $validacao['message']]);
-        }
+    if (! $validacao['valid']) {
+        return redirect()
+            ->back()
+            ->withErrors(['comprovativo' => $validacao['message']]);
+    }
 
-        $dadosSudoPay = $validacao['response'];
+    $dadosSudoPay = $validacao['response'];
+    $numeroTransacao = $dadosSudoPay['TRANSACAO'] ?? null;
 
-        // 2. Verificar se o dinheiro foi para a NOSSA conta (IBAN)
-        if (! $sudoPayService->verificarIBAN($dadosSudoPay)) {
-            return redirect()
-                ->back()
-                ->withErrors(['comprovativo' => 'Este comprovativo nao foi transferido para a nossa conta bancaria. Verifique os dados de pagamento.']);
-        }
+    // 2. VERIFICAR SE JÁ EXISTE PAGAMENTO COM ESTE NÚMERO DE TRANSAÇÃO
+    if ($numeroTransacao) {
+        $pagamentoDuplicado = Pagamento::where('transacao_id', $numeroTransacao)
+            ->where('status', 'confirmado')
+            ->first();
 
-        // 3. Verificar o nome do beneficiário (camada extra de segurança)
-        if (! $sudoPayService->verificarNomeBeneficiario($dadosSudoPay)) {
-            return redirect()
-                ->back()
-                ->withErrors(['comprovativo' => 'O nome do beneficiario no comprovativo nao corresponde aos nossos dados.']);
-        }
-
-        // 4. Verificar se o valor pago cobre o total do pedido
-        $valorPago = $this->valorPagoNoComprovativo($dadosSudoPay);
-
-        if ($valorPago === null || $valorPago < (float) $pedido->total) {
-            return redirect()
-                ->back()
-                ->withErrors([
-                    'comprovativo' => 'O comprovativo foi reconhecido, mas o valor pago ('.number_format($valorPago ?? 0, 2, ',', '.').' Kz) nao cobre o total da compra ('.number_format($pedido->total, 2, ',', '.').' Kz).',
-                ]);
-        }
-
-        // 5. Tudo OK! Guardar o PDF e confirmar o pagamento
-        $comprovativoPath = $request->file('comprovativo')->store('comprovativos/'.$pedido->id, 'public');
-
-        DB::transaction(function () use ($pedido, $comprovativoPath, $dadosSudoPay) {
-            $pedido->update(['status' => 'pago', 'expira_em' => null]);
-
-            $pedido->pagamento?->update([
-                'status' => 'confirmado',
-                'comprovativo' => $comprovativoPath,
-                'gateway_payload' => $dadosSudoPay,
-                'confirmado_em' => now(),
+        if ($pagamentoDuplicado && $pagamentoDuplicado->pedido_id !== $pedido->id) {
+            Log::warning('Tentativa de reutilização de comprovativo', [
+                'transacao' => $numeroTransacao,
+                'pedido_atual' => $pedido->id,
+                'pedido_original' => $pagamentoDuplicado->pedido_id,
+                'user_id' => $pedido->user_id,
             ]);
 
-            $this->liberarMatriculas($pedido);
-        });
+            return redirect()
+                ->back()
+                ->withErrors(['comprovativo' => 'Este comprovativo (transação '.$numeroTransacao.') já foi utilizado no pedido #'.$pagamentoDuplicado->pedido->referencia.'.']);
+        }
+    }
 
-        Log::info('Pagamento confirmado automaticamente via SudoPay', [
-            'pedido_id' => $pedido->id,
-            'user_id' => $pedido->user_id,
-            'valor' => $valorPago,
-            'transacao_id' => $dadosSudoPay['TRANSACAO'] ?? null,
+    // 3. Verificar se o dinheiro foi para a NOSSA conta (IBAN)
+    if (! $sudoPayService->verificarIBAN($dadosSudoPay)) {
+        return redirect()
+            ->back()
+            ->withErrors(['comprovativo' => 'Este comprovativo nao foi transferido para a nossa conta bancaria. Verifique os dados de pagamento.']);
+    }
+
+    // 4. Verificar o nome do beneficiário
+    if (! $sudoPayService->verificarNomeBeneficiario($dadosSudoPay)) {
+        return redirect()
+            ->back()
+            ->withErrors(['comprovativo' => 'O nome do beneficiario no comprovativo nao corresponde aos nossos dados.']);
+    }
+
+    // 5. Verificar se o valor pago cobre o total do pedido
+    $valorPago = $this->valorPagoNoComprovativo($dadosSudoPay);
+
+    if ($valorPago === null || $valorPago < (float) $pedido->total) {
+        return redirect()
+            ->back()
+            ->withErrors([
+                'comprovativo' => 'O comprovativo foi reconhecido, mas o valor pago ('.number_format($valorPago ?? 0, 2, ',', '.').' Kz) nao cobre o total da compra ('.number_format($pedido->total, 2, ',', '.').' Kz).',
+            ]);
+    }
+
+    // 6. Tudo OK! Guardar o PDF e confirmar o pagamento
+    $comprovativoPath = $request->file('comprovativo')->store('comprovativos/'.$pedido->id, 'public');
+
+    DB::transaction(function () use ($pedido, $comprovativoPath, $dadosSudoPay, $numeroTransacao) {
+        $pedido->update(['status' => 'pago', 'expira_em' => null]);
+
+        $pedido->pagamento?->update([
+            'status' => 'confirmado',
+            'comprovativo' => $comprovativoPath,
+            'gateway_payload' => $dadosSudoPay,
+            'transacao_id' => $numeroTransacao, // ✅ Salvar o número da transação
+            'confirmado_em' => now(),
         ]);
 
-        return redirect()
-            ->route('pagamento.comprovante', $pedido)
-            ->with('success', 'Comprovativo validado pela SudoPay. Pagamento confirmado e acesso liberado.');
-    }
+        $this->liberarMatriculas($pedido);
+    });
+
+    Log::info('Pagamento confirmado automaticamente via SudoPay', [
+        'pedido_id' => $pedido->id,
+        'user_id' => $pedido->user_id,
+        'valor' => $valorPago,
+        'transacao_id' => $numeroTransacao,
+    ]);
+
+    return redirect()
+        ->route('pagamento.comprovante', $pedido)
+        ->with('success', 'Comprovativo validado pela SudoPay. Pagamento confirmado e acesso liberado.');
+}
 
     public function confirmar(Pedido $pedido)
     {
