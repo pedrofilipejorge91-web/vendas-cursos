@@ -36,7 +36,7 @@ exports.login = async (req, res) => {
 
   const valida = await bcrypt.compare(senha, user.senha);
   if (!valida) {
-    return res.status(401).json({ erro: "Senha inválida" });
+    return res.status(401).json({ erro: "Credencias inválidas" });
   }
 
   const token = jwt.sign({ id: user.id }, SECRET, {

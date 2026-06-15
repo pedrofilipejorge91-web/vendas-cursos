@@ -214,12 +214,12 @@ class EstudanteController extends Controller
         }
     }
 
-    // BOTÃO STATUS (SUSPENDER/REATIVAR conta em casos excecionais)
+    // BOTÃO STATUS SUSPENDER/REATIVAR conta em casos excecionais
     public function mudarStatus($id)
     {
         $estudante = Estudante::findOrFail($id);
 
-        // ALTERAR STATUS
+        // ALTERAR DE STATUS
         $estudante->status = $estudante->status == 'ativo'
             ? 'inativo'
             : 'ativo';
@@ -229,7 +229,7 @@ class EstudanteController extends Controller
         $user = $estudante->pessoa?->user;
         $ativo = $estudante->status === 'ativo';
 
-        // ✅ Mensagens ajustadas - agora é para casos excecionais (suspensão)
+        // FLUXOS DE Mensagens 
         app(NotificacaoService::class)->enviar(
             $user,
             $ativo ? 'Conta reativada' : 'Conta suspensa temporariamente',

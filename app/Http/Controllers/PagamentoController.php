@@ -176,7 +176,7 @@ class PagamentoController extends Controller
 
     $sudoPayService = app(SudoPayService::class);
 
-    // 1. Validar o comprovativo na SudoPay
+    // aqui Validar o comprovativo na SudoPay
     $validacao = $sudoPayService->validarComprovativo($request->file('comprovativo'));
 
     if (! $validacao['valid']) {
@@ -188,7 +188,7 @@ class PagamentoController extends Controller
     $dadosSudoPay = $validacao['response'];
     $numeroTransacao = $dadosSudoPay['TRANSACAO'] ?? null;
 
-    // 2. VERIFICAR SE JÁ EXISTE PAGAMENTO COM ESTE NÚMERO DE TRANSAÇÃO
+    // aqui VERIFICAR SE JÁ EXISTE PAGAMENTO COM ESTE NÚMERO DE TRANSAÇÃO
     if ($numeroTransacao) {
         $pagamentoDuplicado = Pagamento::where('transacao_id', $numeroTransacao)
             ->where('status', 'confirmado')
@@ -208,21 +208,21 @@ class PagamentoController extends Controller
         }
     }
 
-    // 3. Verificar se o dinheiro foi para a NOSSA conta (IBAN)
+    // aqui Verificar se o dinheiro foi para a NOSSA conta (IBAN)
     if (! $sudoPayService->verificarIBAN($dadosSudoPay)) {
         return redirect()
             ->back()
             ->withErrors(['comprovativo' => 'Este comprovativo nao foi transferido para a nossa conta bancaria. Verifique os dados de pagamento.']);
     }
 
-    // 4. Verificar o nome do beneficiário
+    // aqui Verificar o nome do beneficiário
     if (! $sudoPayService->verificarNomeBeneficiario($dadosSudoPay)) {
         return redirect()
             ->back()
             ->withErrors(['comprovativo' => 'O nome do beneficiario no comprovativo nao corresponde aos nossos dados.']);
     }
 
-    // 5. Verificar se o valor pago cobre o total do pedido
+    // aqui Verificar se o valor pago cobre o total do pedido
     $valorPago = $this->valorPagoNoComprovativo($dadosSudoPay);
 
     if ($valorPago === null || $valorPago < (float) $pedido->total) {
@@ -233,7 +233,7 @@ class PagamentoController extends Controller
             ]);
     }
 
-    // 6. Tudo OK! Guardar o PDF e confirmar o pagamento
+    //  Guardar o PDF e confirmar o pagamento
     $comprovativoPath = $request->file('comprovativo')->store('comprovativos/'.$pedido->id, 'public');
 
     DB::transaction(function () use ($pedido, $comprovativoPath, $dadosSudoPay, $numeroTransacao) {
@@ -243,7 +243,7 @@ class PagamentoController extends Controller
             'status' => 'confirmado',
             'comprovativo' => $comprovativoPath,
             'gateway_payload' => $dadosSudoPay,
-            'transacao_id' => $numeroTransacao, // ✅ Salvar o número da transação
+            'transacao_id' => $numeroTransacao, // Aqui Salvar o número da transação
             'confirmado_em' => now(),
         ]);
 

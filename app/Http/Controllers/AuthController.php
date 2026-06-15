@@ -13,17 +13,17 @@ use App\Services\NotificacaoService;
 
 class AuthController extends Controller
 {
-    // =========================
-    // FORM REGISTER
-    // =========================
+    
+    // EXIBIR O FORMULARIO REGISTER
+    
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    // =========================
+    
     // REGISTRO DO ESTUDANTE
-    // =========================
+    
     public function registerEstudante(Request $request)
     {
         $request->validate([
@@ -72,11 +72,11 @@ class AuthController extends Controller
                 'contacto' => $request->contacto,
             ]);
 
-            // 3. Criar o registo de estudante (ATIVO automaticamente)
+            // 3. Criar o registo de estudante 
             Estudante::create([
                 'pessoa_id' => $pessoa->id,
                 'escola_actual' => $request->escola_actual,
-                'status' => 'ativo', // ✅ Conta ativa imediatamente
+                'status' => 'ativo',
                 'data_inscricao' => now(),
             ]);
 
@@ -134,17 +134,17 @@ class AuthController extends Controller
         }
     }
 
-    // =========================
-    // LOGIN FORM
-    // =========================
+    
+    // LOGIN FORMULARIO
+    
     public function loginForm()
     {
         return view('auth.login');
     }
 
-    // =========================
-    // LOGIN
-    // =========================
+    
+    // PROCESSO DE LOGIN
+    
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -161,7 +161,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // ✅ Removida a verificação de status - todas as contas são ativas automaticamente
+            //REDIRECIONAR COM BASE NO TIPO DE UTILIZADOR
 
             return match ($user->tipo) {
                 'admin' => redirect()->route('admin.dashboard'),
@@ -176,9 +176,9 @@ class AuthController extends Controller
         ]);
     }
 
-    // =========================
-    // LOGOUT
-    // =========================
+    
+    // LOGOUT OU SAIR
+    
     public function logout(Request $request)
     {
         Auth::logout();
